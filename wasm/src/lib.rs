@@ -154,8 +154,8 @@ pub struct GeometryBuffer {
 }
 
 
-#[wasm_bindgen]
 pub struct Chunk {
+    parent:*mut Universe,
     origin:V3F,
     // size:V3F,
     // cell_resolution:V3I,
@@ -165,12 +165,13 @@ pub struct Chunk {
     needs_update:bool,
 }
 
-#[wasm_bindgen]
+// error #[wasm_bindgen] generic impls aren't supported
+// #[wasm_bindgen]
 impl Chunk {
 }
 
 impl Chunk {
-    pub fn new(position:V3F) -> Chunk{
+    pub fn new(parent:*mut Universe,origin:V3F) -> Chunk{
         // let size=V3F{
         //     x:1.0,
         //     y:1.0,
@@ -194,7 +195,8 @@ impl Chunk {
             color_list:vec!{},
         };
         Chunk { 
-            origin: position,
+            parent,
+            origin: origin,
             // size,
             // cell_resolution,
             cell_list,
@@ -205,6 +207,9 @@ impl Chunk {
     }
     pub fn update(&mut self){
         // DO NOTHING
+        // unsafe{
+        //     let parent=self.parent.as_mut().unwrap();
+        // }
     }
     pub fn draw(&mut self,_position:&V3F){
         let mut vertex_list=vec!{};
@@ -291,6 +296,7 @@ pub struct Universe {
 impl Universe {
     pub fn new() -> Universe{
         utils::set_panic_hook();
+
         let position=V3F{
             x:UNIVERSE_SIZE_WIDTH * -0.5 ,
             y:UNIVERSE_SIZE_HEIGHT * -0.5,
@@ -306,6 +312,13 @@ impl Universe {
             y:UNIVERSE_RESOLUTION_HEIGHT as i32,
             z:UNIVERSE_RESOLUTION_DEPTH as i32,
         };
+        let mut universe=Universe {
+            position,
+            size,
+            chunk_resolution,
+            chunk_list:vec!{},
+        };
+
         let mut chunk_list=vec!{};
         for iz in 0..UNIVERSE_RESOLUTION_DEPTH{
             let z=CHUNK_SIZE_DEPTH * iz as f32 + UNIVERSE_SIZE_DEPTH * -0.5;
@@ -313,7 +326,7 @@ impl Universe {
                 let y=CHUNK_SIZE_HEIGHT * iy as f32 + UNIVERSE_SIZE_HEIGHT * -0.5;
                 for ix in 0..UNIVERSE_RESOLUTION_WIDTH{
                     let x=CHUNK_SIZE_WIDTH * ix as f32 + UNIVERSE_SIZE_WIDTH * -0.5;
-                    let chunk = Chunk::new(V3F{
+                    let chunk = Chunk::new(&mut universe,V3F{
                         x,
                         y,
                         z,
@@ -322,12 +335,8 @@ impl Universe {
                 }
             }
         }
-        Universe {
-            position,
-            size,
-            chunk_resolution,
-            chunk_list,
-        }
+        universe.chunk_list=chunk_list;
+        universe
     }
     pub fn update(&mut self){
         for chunk in self.chunk_list.iter_mut(){
