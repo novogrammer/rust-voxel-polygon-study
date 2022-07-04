@@ -23,7 +23,7 @@ export function toBufferGeometry(universe,i){
   }
   {
     const colorListPointer=universe.get_geometry_buffer_color_list_ptr(i);
-    const colorList =  new Uint8Array(memory.buffer,colorListPointer,vertex_length * 3);
+    const colorList =  new Float32Array(memory.buffer,colorListPointer,vertex_length * 3);
     const colorAttribute=new THREE.BufferAttribute(colorList,3);
     bufferGeometry.setAttribute("color",colorAttribute);
   }

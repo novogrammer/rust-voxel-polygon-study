@@ -30,8 +30,15 @@ async function main(){
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
   camera.position.z = 5;
 
-  const material=new THREE.MeshNormalMaterial({
+  const material=new THREE.MeshBasicMaterial({
+    color:0xffffff,
+    vertexColors:true,
   });
+  // const material=new THREE.MeshNormalMaterial({
+  //   color:0xffffff,
+  //   vertexColors:true,
+  // });
+  
   for(let i=0;i<l;i++){
     const bufferGeometry=toBufferGeometry(universe,i);
     console.log(bufferGeometry);
@@ -42,7 +49,7 @@ async function main(){
   }
   renderer.render(scene,camera);
 
-  // universe.free();
+  universe.free();
 }
 
 

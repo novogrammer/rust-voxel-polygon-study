@@ -106,32 +106,33 @@ impl V3I {
 }
 
 
-#[wasm_bindgen]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Color{
-    r:u8,
-    g:u8,
-    b:u8,
-}
-#[wasm_bindgen]
-impl Color {
-    pub fn new(r:u8,g:u8,b:u8)->Color{
-        Color {
-            r,
-            g,
-            b,
-        }
-    }
-    pub fn get_r(&self)->u8{
-        self.r
-    }
-    pub fn get_g(&self)->u8{
-        self.g
-    }
-    pub fn get_b(&self)->u8{
-        self.b
-    }
-}
+// #[wasm_bindgen]
+// #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+// #[repr(packed)]
+// pub struct Color{
+//     r:u8,
+//     g:u8,
+//     b:u8,
+// }
+// #[wasm_bindgen]
+// impl Color {
+//     pub fn new(r:u8,g:u8,b:u8)->Color{
+//         Color {
+//             r,
+//             g,
+//             b,
+//         }
+//     }
+//     pub fn get_r(&self)->u8{
+//         self.r
+//     }
+//     pub fn get_g(&self)->u8{
+//         self.g
+//     }
+//     pub fn get_b(&self)->u8{
+//         self.b
+//     }
+// }
 
 
 
@@ -139,7 +140,7 @@ impl Color {
 pub struct Vertex {
     position:V3F,
     normal:V3F,
-    color:Color,
+    color:V3F,
 }
 
 #[wasm_bindgen]
@@ -150,7 +151,7 @@ pub struct Geometry {
 pub struct GeometryBuffer {
     position_list:Vec<V3F>,
     normal_list:Vec<V3F>,
-    color_list:Vec<Color>,
+    color_list:Vec<V3F>,
 }
 
 
@@ -225,10 +226,10 @@ impl Chunk {
                     y: 0.0,
                     z: 1.0,
                 },
-                color:Color {
-                    r: 255,
-                    g: 255,
-                    b: 255,
+                color:V3F {
+                    x: 255.0/255.0,
+                    y: 255.0/255.0,
+                    z: 255.0/255.0,
                 },
             });
             vertex_list.push(Vertex{
@@ -242,10 +243,10 @@ impl Chunk {
                     y: 0.0,
                     z: 1.0,
                 },
-                color:Color {
-                    r: 255,
-                    g: 255,
-                    b: 255,
+                color:V3F {
+                    x: 255.0/255.0,
+                    y: 255.0/255.0,
+                    z: 255.0/255.0,
                 },
             });
             vertex_list.push(Vertex{
@@ -259,10 +260,10 @@ impl Chunk {
                     y: 0.0,
                     z: 1.0,
                 },
-                color:Color {
-                    r: 255,
-                    g: 0,
-                    b: 255,
+                color:V3F {
+                    x: 255.0/255.0,
+                    y: 0.0/255.0,
+                    z: 255.0/255.0,
                 },
             });
         }
@@ -355,7 +356,7 @@ impl Universe {
     pub fn get_geometry_buffer_normal_list_ptr(&self,i:usize)-> *const V3F{
         self.get_chunk(i).geometry_buffer.normal_list.as_ptr()
     }
-    pub fn get_geometry_buffer_color_list_ptr(&self,i:usize)-> *const Color{
+    pub fn get_geometry_buffer_color_list_ptr(&self,i:usize)-> *const V3F{
         self.get_chunk(i).geometry_buffer.color_list.as_ptr()
     }
     pub fn get_chunk_list_length(&self)->usize{
