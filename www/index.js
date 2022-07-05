@@ -1,7 +1,7 @@
 import {Universe,V3F} from "rust-voxel-polygon-study-wasm";
 
 import * as THREE from "three";
-import { toBufferGeometry } from "./lib/rust_to_three";
+import { updateBufferGeometry } from "./lib/rust_to_three";
 
 
 
@@ -40,7 +40,9 @@ async function main(){
   // });
   
   for(let i=0;i<l;i++){
-    const bufferGeometry=toBufferGeometry(universe,i);
+    const bufferGeometry = new THREE.BufferGeometry();
+
+    updateBufferGeometry(universe,i,bufferGeometry);
     console.log(bufferGeometry);
     const mesh=new THREE.Mesh(bufferGeometry,material);
     const origin=universe.get_chunk_origin(i);

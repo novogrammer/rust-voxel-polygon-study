@@ -3,8 +3,15 @@ import { memory } from "rust-voxel-polygon-study-wasm/rust_voxel_polygon_study_w
 import * as THREE from "three";
 
 
-export function toBufferGeometry(universe,i){
-  const bufferGeometry = new THREE.BufferGeometry();
+export function updateBufferGeometry(universe,i,bufferGeometry){
+
+  const version = universe.get_geometry_version(i);
+  console.log(`bufferGeometry.userData.version:${bufferGeometry.userData.version}`);
+  console.log(`version:${version}`);
+  if(bufferGeometry.userData.version == version){
+    return;
+  }
+
   const vertex_length=universe.get_geometry_buffer_vertex_length(i);
 
   {
@@ -27,6 +34,5 @@ export function toBufferGeometry(universe,i){
     const colorAttribute=new THREE.BufferAttribute(colorList,3);
     bufferGeometry.setAttribute("color",colorAttribute);
   }
-
-  return bufferGeometry;
+  bufferGeometry.userData.version=version;
 }

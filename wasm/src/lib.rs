@@ -164,6 +164,7 @@ pub struct Chunk {
     geometry:Geometry,
     geometry_buffer:GeometryBuffer,
     needs_update:bool,
+    version:u32,
 }
 
 // error #[wasm_bindgen] generic impls aren't supported
@@ -203,7 +204,8 @@ impl Chunk {
             cell_list,
             geometry,
             geometry_buffer,
-            needs_update:false,
+            needs_update:true,
+            version:0,
         }
     }
     pub fn update(&mut self){
@@ -213,6 +215,9 @@ impl Chunk {
         // }
     }
     pub fn draw(&mut self,_position:&V3F){
+        if !self.needs_update {
+            return;
+        }
         let mut vertex_list=vec!{};
         {
             vertex_list.push(Vertex{
@@ -279,6 +284,7 @@ impl Chunk {
         self.geometry_buffer.position_list=position_list;
         self.geometry_buffer.normal_list=normal_list;
         self.geometry_buffer.color_list=color_list;
+        self.version += 1;
     }
 }
 
@@ -367,6 +373,9 @@ impl Universe {
     }
     pub fn get_chunk_origin(&self,i:usize)->V3F{
         self.get_chunk(i).origin.clone()
+    }
+    pub fn get_geometry_version(&self,i:usize)->u32{
+        self.get_chunk(i).version
     }
 }
 
