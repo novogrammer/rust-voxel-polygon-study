@@ -163,7 +163,7 @@ pub struct Chunk {
     cell_list:Vec<Cell>,
     geometry:Geometry,
     geometry_buffer:GeometryBuffer,
-    needs_update:bool,
+    needs_draw:bool,
     version:u32,
 }
 
@@ -204,7 +204,7 @@ impl Chunk {
             cell_list,
             geometry,
             geometry_buffer,
-            needs_update:true,
+            needs_draw:true,
             version:0,
         }
     }
@@ -215,7 +215,7 @@ impl Chunk {
         // }
     }
     pub fn draw(&mut self,_position:&V3F){
-        if !self.needs_update {
+        if !self.needs_draw {
             return;
         }
         let mut vertex_list=vec!{};
