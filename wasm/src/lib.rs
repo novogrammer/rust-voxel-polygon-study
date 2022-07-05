@@ -211,10 +211,47 @@ impl Chunk {
         }
     }
 
-    pub fn update(&mut self){
-        let mut callback=|ix:i32,iy:i32,iz:i32,cell:&mut Cell| {
+    pub fn invalidate_neighbors(&mut self,ix:i32,iy:i32,iz:i32){
+        for inz in -1..(1+1){
+            let z= iz + inz;
+            for iny in -1..(1+1){
+                let y= iy + iny;
+                for inx in -1..(1+1){
+                    let x= ix + inx;
+                    let mut neighbor_chunk_index=self.chunk_index.clone();
+                    if x < 0{
+                        neighbor_chunk_index.x-=1;
+                    }
+                    if CHUNK_RESOLUTION_WIDTH as i32<=x {
+                        neighbor_chunk_index.x+=1;
+                    }
+                    if y < 0{
+                        neighbor_chunk_index.y-=1;
+                    }
+                    if CHUNK_RESOLUTION_HEIGHT as i32<=y {
+                        neighbor_chunk_index.y+=1;
+                    }
+                    if z < 0{
+                        neighbor_chunk_index.z-=1;
+                    }
+                    if CHUNK_RESOLUTION_DEPTH as i32<=z {
+                        neighbor_chunk_index.z+=1;
+                    }
+                    unsafe{
+                        let parent=self.parent.as_mut().unwrap();
+                        let neighbor_chunk_option = parent. get_mut_chunk_option_by_chunk_index(&neighbor_chunk_index);
+                        if let Some(neighbor_chunk)=neighbor_chunk_option{
+                            neighbor_chunk.needs_draw=true
 
-        };
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+    pub fn update(&mut self){
+
         let mut i=0;
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32){
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32){
@@ -227,49 +264,8 @@ impl Chunk {
                     if *cell != nextCell{
                         // needs_draw
                         *cell=nextCell;
-                        self.needs_draw=true;
-                        // check neighbors
-                        for inz in -1..(1+1){
-                            let z= iz + inz;
-                            for iny in -1..(1+1){
-                                let y= iy + iny;
-                                for inx in -1..(1+1){
-                                    let x= ix + inx;
-                                    let mut neighbor_chunk_index=self.chunk_index.clone();
-                                    if x < 0{
-                                        neighbor_chunk_index.x-=1;
-                                    }
-                                    if CHUNK_RESOLUTION_WIDTH as i32<=x {
-                                        neighbor_chunk_index.x+=1;
-                                    }
-                                    if y < 0{
-                                        neighbor_chunk_index.y-=1;
-                                    }
-                                    if CHUNK_RESOLUTION_HEIGHT as i32<=y {
-                                        neighbor_chunk_index.y+=1;
-                                    }
-                                    if z < 0{
-                                        neighbor_chunk_index.z-=1;
-                                    }
-                                    if CHUNK_RESOLUTION_DEPTH as i32<=z {
-                                        neighbor_chunk_index.z+=1;
-                                    }
-                                    unsafe{
-                                        let parent=self.parent.as_mut().unwrap();
-                                        let neighbor_chunk_option = parent. get_mut_chunk_option_by_chunk_index(&neighbor_chunk_index);
-                                        if let Some(neighbor_chunk)=neighbor_chunk_option{
-                                            neighbor_chunk.needs_draw=true
-
-                                        }
-                                    }
-
-                                    
-                                }
-                            }
-                        }
-
+                        self.invalidate_neighbors(ix,iy,iz);
                     }
-
                     i+=1;
                 }
             }
