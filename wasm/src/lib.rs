@@ -158,6 +158,7 @@ pub struct GeometryBuffer {
 pub struct Chunk {
     parent:*mut Universe,
     origin:V3F,
+    chunk_index:V3I,
     // size:V3F,
     // cell_resolution:V3I,
     cell_list:Vec<Cell>,
@@ -173,7 +174,7 @@ impl Chunk {
 }
 
 impl Chunk {
-    pub fn new(parent:*mut Universe,origin:V3F) -> Chunk{
+    pub fn new(parent:*mut Universe,origin:V3F,chunk_index:V3I) -> Chunk{
         // let size=V3F{
         //     x:1.0,
         //     y:1.0,
@@ -199,6 +200,7 @@ impl Chunk {
         Chunk { 
             parent,
             origin: origin,
+            chunk_index,
             // size,
             // cell_resolution,
             cell_list,
@@ -208,11 +210,70 @@ impl Chunk {
             version:0,
         }
     }
+
     pub fn update(&mut self){
-        // DO NOTHING
-        // unsafe{
-        //     let parent=self.parent.as_mut().unwrap();
-        // }
+        let mut callback=|ix:i32,iy:i32,iz:i32,cell:&mut Cell| {
+
+        };
+        let mut i=0;
+        for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32){
+            for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32){
+                for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32){
+                    let cell=self.cell_list.get_mut(i).unwrap();
+                    let mut nextCell=Cell::Air;
+                    if iz+iy+ix <= 32 {
+                        nextCell=Cell::Rock;
+                    }
+                    if *cell != nextCell{
+                        // needs_draw
+                        *cell=nextCell;
+                        self.needs_draw=true;
+                        // check neighbors
+                        for inz in -1..(1+1){
+                            let z= iz + inz;
+                            for iny in -1..(1+1){
+                                let y= iy + iny;
+                                for inx in -1..(1+1){
+                                    let x= ix + inx;
+                                    let mut neighbor_chunk_index=self.chunk_index.clone();
+                                    if x < 0{
+                                        neighbor_chunk_index.x-=1;
+                                    }
+                                    if CHUNK_RESOLUTION_WIDTH as i32<=x {
+                                        neighbor_chunk_index.x+=1;
+                                    }
+                                    if y < 0{
+                                        neighbor_chunk_index.y-=1;
+                                    }
+                                    if CHUNK_RESOLUTION_HEIGHT as i32<=y {
+                                        neighbor_chunk_index.y+=1;
+                                    }
+                                    if z < 0{
+                                        neighbor_chunk_index.z-=1;
+                                    }
+                                    if CHUNK_RESOLUTION_DEPTH as i32<=z {
+                                        neighbor_chunk_index.z+=1;
+                                    }
+                                    unsafe{
+                                        let parent=self.parent.as_mut().unwrap();
+                                        let neighbor_chunk_option = parent. get_mut_chunk_option_by_chunk_index(&neighbor_chunk_index);
+                                        if let Some(neighbor_chunk)=neighbor_chunk_option{
+                                            neighbor_chunk.needs_draw=true
+
+                                        }
+                                    }
+
+                                    
+                                }
+                            }
+                        }
+
+                    }
+
+                    i+=1;
+                }
+            }
+        }
     }
     pub fn draw(&mut self,_position:&V3F){
         if !self.needs_draw {
@@ -337,6 +398,10 @@ impl Universe {
                         x,
                         y,
                         z,
+                    },V3I {
+                        x: ix as i32,
+                        y: iy as i32,
+                        z: iz as i32
                     });
                     chunk_list.push(chunk);
                 }
@@ -382,5 +447,27 @@ impl Universe {
 impl Universe {
     pub fn get_chunk(&self,i:usize) -> &Chunk{
         self.chunk_list.get(i).unwrap()
+    }
+    pub fn get_mut_chunk_option_by_chunk_index(&mut self,chunk_index:&V3I) -> Option<&mut Chunk>{
+        if chunk_index.x < 0{
+            return Option::None;
+        }
+        if UNIVERSE_RESOLUTION_WIDTH as i32<=chunk_index.x{
+            return Option::None;
+        }
+        if chunk_index.y < 0{
+            return Option::None;
+        }
+        if UNIVERSE_RESOLUTION_HEIGHT as i32<=chunk_index.y{
+            return Option::None;
+        }
+        if chunk_index.z < 0{
+            return Option::None;
+        }
+        if UNIVERSE_RESOLUTION_DEPTH as i32<=chunk_index.z{
+            return Option::None;
+        }
+        let i=(UNIVERSE_RESOLUTION_HEIGHT as i32)*(UNIVERSE_RESOLUTION_WIDTH as i32)*chunk_index.z+chunk_index.y*(UNIVERSE_RESOLUTION_WIDTH as i32)+chunk_index.x;
+        self.chunk_list.get_mut(i as usize)
     }
 }
