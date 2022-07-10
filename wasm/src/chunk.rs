@@ -127,29 +127,130 @@ impl Chunk {
             }
         }
     }
-    pub fn draw(&mut self, _position: &V3F) {
-        if !self.needs_draw {
-            return;
+    pub fn get_cell_option_by_cell_index(&self, cell_index: &V3I) -> Option<&Cell> {
+        let x = cell_index.get_x();
+        let y = cell_index.get_y();
+        let z = cell_index.get_z();
+        if x < 0 {
+            return Option::None;
+        } else if CHUNK_RESOLUTION_WIDTH as i32 <= x {
+            return Option::None;
         }
+        if y < 0 {
+            return Option::None;
+        } else if CHUNK_RESOLUTION_HEIGHT as i32 <= y {
+            return Option::None;
+        }
+        if z < 0 {
+            return Option::None;
+        } else if CHUNK_RESOLUTION_DEPTH as i32 <= z {
+            return Option::None;
+        }
+
+        let i = (CHUNK_RESOLUTION_HEIGHT as i32) * (CHUNK_RESOLUTION_WIDTH as i32) * z
+            + y * (CHUNK_RESOLUTION_WIDTH as i32)
+            + x;
+        return self.cell_list.get(i as usize);
+    }
+    fn get_cell_buffer(&mut self) -> Vec<Cell> {
+        let mut cell_buffer = vec![];
+        for iz in -1..(CHUNK_RESOLUTION_DEPTH as i32 + 1) {
+            for iy in -1..(CHUNK_RESOLUTION_HEIGHT as i32 + 1) {
+                for ix in -1..(CHUNK_RESOLUTION_WIDTH as i32 + 1) {
+                    let mut cell_index = V3I::new(ix, iy, iz);
+                    let mut chunk_index = self.chunk_index.clone();
+
+                    if ix < 0 {
+                        chunk_index.set_x(ix + (CHUNK_RESOLUTION_WIDTH as i32));
+                        cell_index.set_x(cell_index.get_x() - 1);
+                    } else if CHUNK_RESOLUTION_WIDTH as i32 <= ix {
+                        chunk_index.set_x(ix - (CHUNK_RESOLUTION_WIDTH as i32));
+                        cell_index.set_x(cell_index.get_x() + 1);
+                    }
+                    if iy < 0 {
+                        chunk_index.set_y(iy + (CHUNK_RESOLUTION_HEIGHT as i32));
+                        cell_index.set_y(cell_index.get_y() - 1);
+                    } else if CHUNK_RESOLUTION_HEIGHT as i32 <= iy {
+                        chunk_index.set_y(iy - (CHUNK_RESOLUTION_HEIGHT as i32));
+                        cell_index.set_y(cell_index.get_y() + 1);
+                    }
+                    if iz < 0 {
+                        chunk_index.set_z(iz + (CHUNK_RESOLUTION_DEPTH as i32));
+                        cell_index.set_z(cell_index.get_z() - 1);
+                    } else if CHUNK_RESOLUTION_DEPTH as i32 <= iz {
+                        chunk_index.set_z(iz - (CHUNK_RESOLUTION_DEPTH as i32));
+                        cell_index.set_z(cell_index.get_z() + 1);
+                    }
+                    let mut cell = Cell::Air;
+                    unsafe {
+                        let chunk_option = self
+                            .parent
+                            .as_mut()
+                            .unwrap()
+                            .get_mut_chunk_option_by_chunk_index(&chunk_index);
+                        if let Some(result_chunk) = chunk_option {
+                            let cell_option =
+                                result_chunk.get_cell_option_by_cell_index(&cell_index);
+                            if let Some(result_cell) = cell_option {
+                                cell = *result_cell;
+                            }
+                        }
+                    }
+                    cell_buffer.push(cell);
+                }
+            }
+        }
+        cell_buffer
+    }
+    fn draw_geometry(&mut self, _position: &V3F) {
+        let cell_buffer = self.get_cell_buffer();
         let mut vertex_list = vec![];
-        {
-            vertex_list.push(Vertex {
-                position: V3F::new(-0.5, -1.0, 0.0),
-                normal: V3F::new(0.0, 0.0, 1.0),
-                color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
-            });
-            vertex_list.push(Vertex {
-                position: V3F::new(0.5, -1.0, 0.0),
-                normal: V3F::new(0.0, 0.0, 1.0),
-                color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
-            });
-            vertex_list.push(Vertex {
-                position: V3F::new(0.0, 1.0, 0.0),
-                normal: V3F::new(0.0, 0.0, 1.0),
-                color: V3F::new(255.0 / 255.0, 0.0 / 255.0, 255.0 / 255.0),
-            });
+
+        for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
+            for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
+                for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32) {
+                    let i = (CHUNK_RESOLUTION_HEIGHT as i32) * (CHUNK_RESOLUTION_WIDTH as i32) * iz
+                        + iy * (CHUNK_RESOLUTION_WIDTH as i32)
+                        + ix;
+                    let position = V3F::new(ix as f32, iy as f32, iz as f32);
+                    let cell = self.cell_list.get(i as usize).unwrap();
+                    // for now
+                    if *cell == Cell::Rock {
+                        vertex_list.push(Vertex {
+                            position: V3F::new(
+                                -0.5 + position.get_x(),
+                                -1.0 + position.get_y(),
+                                0.0 + position.get_z(),
+                            ),
+                            normal: V3F::new(0.0, 0.0, 1.0),
+                            color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
+                        });
+                        vertex_list.push(Vertex {
+                            position: V3F::new(
+                                0.5 + position.get_x(),
+                                -1.0 + position.get_y(),
+                                0.0 + position.get_z(),
+                            ),
+                            normal: V3F::new(0.0, 0.0, 1.0),
+                            color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
+                        });
+                        vertex_list.push(Vertex {
+                            position: V3F::new(
+                                0.0 + position.get_x(),
+                                1.0 + position.get_y(),
+                                0.0 + position.get_z(),
+                            ),
+                            normal: V3F::new(0.0, 0.0, 1.0),
+                            color: V3F::new(255.0 / 255.0, 0.0 / 255.0, 255.0 / 255.0),
+                        });
+                    }
+                }
+            }
         }
+
         self.geometry.vertex_list = vertex_list;
+    }
+    fn copy_to_geometry_buffer(&mut self) {
         let mut position_list = vec![];
         let mut normal_list = vec![];
         let mut color_list = vec![];
@@ -162,5 +263,13 @@ impl Chunk {
         self.geometry_buffer.normal_list = normal_list;
         self.geometry_buffer.color_list = color_list;
         self.version += 1;
+    }
+    pub fn draw(&mut self, position: &V3F) {
+        if !self.needs_draw {
+            return;
+        }
+        self.draw_geometry(position);
+        self.copy_to_geometry_buffer();
+        self.needs_draw = false;
     }
 }

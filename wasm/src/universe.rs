@@ -104,29 +104,28 @@ impl Universe {
         self.chunk_list.get(i).unwrap()
     }
     pub fn get_mut_chunk_option_by_chunk_index(&mut self, chunk_index: &V3I) -> Option<&mut Chunk> {
-        if chunk_index.get_x() < 0 {
+        let x = chunk_index.get_x();
+        let y = chunk_index.get_y();
+        let z = chunk_index.get_z();
+
+        if x < 0 {
+            return Option::None;
+        } else if UNIVERSE_RESOLUTION_WIDTH as i32 <= x {
             return Option::None;
         }
-        if UNIVERSE_RESOLUTION_WIDTH as i32 <= chunk_index.get_x() {
+        if y < 0 {
+            return Option::None;
+        } else if UNIVERSE_RESOLUTION_HEIGHT as i32 <= y {
             return Option::None;
         }
-        if chunk_index.get_y() < 0 {
+        if z < 0 {
+            return Option::None;
+        } else if UNIVERSE_RESOLUTION_DEPTH as i32 <= z {
             return Option::None;
         }
-        if UNIVERSE_RESOLUTION_HEIGHT as i32 <= chunk_index.get_y() {
-            return Option::None;
-        }
-        if chunk_index.get_z() < 0 {
-            return Option::None;
-        }
-        if UNIVERSE_RESOLUTION_DEPTH as i32 <= chunk_index.get_z() {
-            return Option::None;
-        }
-        let i = (UNIVERSE_RESOLUTION_HEIGHT as i32)
-            * (UNIVERSE_RESOLUTION_WIDTH as i32)
-            * chunk_index.get_z()
-            + chunk_index.get_y() * (UNIVERSE_RESOLUTION_WIDTH as i32)
-            + chunk_index.get_x();
+        let i = (UNIVERSE_RESOLUTION_HEIGHT as i32) * (UNIVERSE_RESOLUTION_WIDTH as i32) * z
+            + y * (UNIVERSE_RESOLUTION_WIDTH as i32)
+            + x;
         self.chunk_list.get_mut(i as usize)
     }
 }
