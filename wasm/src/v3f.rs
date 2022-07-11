@@ -1,3 +1,4 @@
+use cgmath::Vector3;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -29,5 +30,18 @@ impl V3F {
     }
     pub fn set_z(&mut self, z: f32) {
         self.z = z;
+    }
+}
+
+impl V3F {
+    pub fn from_cgmath(v: &Vector3<f32>) -> V3F {
+        V3F {
+            x: v.x,
+            y: v.y,
+            z: v.z,
+        }
+    }
+    pub fn to_cgmath(&self) -> Vector3<f32> {
+        Vector3::<f32>::new(self.x, self.y, self.z)
     }
 }

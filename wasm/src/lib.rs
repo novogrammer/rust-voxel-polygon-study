@@ -16,7 +16,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 //     alert("Hello, rust-voxel-polygon-study-wasm!");
 // }
 
-mod cell;
+mod block;
 mod chunk;
 mod geometry;
 mod geometry_buffer;

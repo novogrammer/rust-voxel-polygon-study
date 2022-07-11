@@ -1,6 +1,8 @@
 import {Universe,V3F} from "rust-voxel-polygon-study-wasm";
 
 import * as THREE from "three";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
+
 import { updateBufferGeometry } from "./lib/rust_to_three";
 
 
@@ -29,6 +31,8 @@ async function main(){
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
   camera.position.z = 5;
+  const controls = new OrbitControls(camera, renderer.domElement);
+
 
   const material=new THREE.MeshBasicMaterial({
     color:0xffffff,
@@ -49,7 +53,12 @@ async function main(){
     mesh.position.set(origin.get_x(),origin.get_y(),origin.get_z());
     scene.add(mesh);
   }
-  renderer.render(scene,camera);
+
+  function render() {
+    renderer.render(scene,camera);
+  }
+
+  renderer.setAnimationLoop( render );
 
   universe.free();
 }

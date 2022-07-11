@@ -1,5 +1,18 @@
-use crate::{chunk::*, utils, v3f::V3F, v3i::V3I};
+use crate::{block::*, chunk::*, utils, v3f::V3F, v3i::V3I};
 use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+
+}
+
+macro_rules! console_log {
+  // Note that this is using the `log` function imported above during
+  // `bare_bones`
+  ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
 
 pub const UNIVERSE_RESOLUTION_WIDTH: usize = 2;
 pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 2;
@@ -53,11 +66,8 @@ impl Universe {
                 let y = CHUNK_SIZE_HEIGHT * iy as f32 + UNIVERSE_SIZE_HEIGHT * -0.5;
                 for ix in 0..UNIVERSE_RESOLUTION_WIDTH {
                     let x = CHUNK_SIZE_WIDTH * ix as f32 + UNIVERSE_SIZE_WIDTH * -0.5;
-                    let chunk = Chunk::new(
-                        &mut universe,
-                        V3F::new(x, y, z),
-                        V3I::new(ix as i32, iy as i32, iz as i32),
-                    );
+                    let chunk =
+                        Chunk::new(V3F::new(x, y, z), V3I::new(ix as i32, iy as i32, iz as i32));
                     chunk_list.push(chunk);
                 }
             }
@@ -66,13 +76,90 @@ impl Universe {
         universe
     }
     pub fn update(&mut self) {
+        let mut neighbor_chunk_index_list = vec![];
         for chunk in self.chunk_list.iter_mut() {
-            chunk.update();
+            let mut v = chunk.update();
+            neighbor_chunk_index_list.append(&mut v);
+        }
+        for neighbor_chunk_index in neighbor_chunk_index_list {
+            let chunk_option = self.get_mut_chunk_option_by_chunk_index(&neighbor_chunk_index);
+            if let Some(chunk) = chunk_option {
+                chunk.needs_draw = true;
+            }
         }
     }
-    pub fn draw(&mut self, position: &V3F) {
-        for chunk in self.chunk_list.iter_mut() {
-            chunk.draw(&position);
+    fn make_block_buffer(&mut self, chunk_index: &V3I) -> Vec<Block> {
+        let mut block_buffer = vec![];
+        block_buffer.reserve(
+            (CHUNK_RESOLUTION_DEPTH + 2)
+                * (CHUNK_RESOLUTION_HEIGHT + 2)
+                * (CHUNK_RESOLUTION_WIDTH + 2),
+        );
+
+        for iz in -1..(CHUNK_RESOLUTION_DEPTH as i32 + 1) {
+            for iy in -1..(CHUNK_RESOLUTION_HEIGHT as i32 + 1) {
+                for ix in -1..(CHUNK_RESOLUTION_WIDTH as i32 + 1) {
+                    let mut block_index = V3I::new(ix, iy, iz);
+                    let mut chunk_index = chunk_index.clone();
+
+                    if ix < 0 {
+                        block_index.set_x(ix + (CHUNK_RESOLUTION_WIDTH as i32));
+                        chunk_index.set_x(chunk_index.get_x() - 1);
+                    } else if CHUNK_RESOLUTION_WIDTH as i32 <= ix {
+                        block_index.set_x(ix - (CHUNK_RESOLUTION_WIDTH as i32));
+                        chunk_index.set_x(chunk_index.get_x() + 1);
+                    }
+                    if iy < 0 {
+                        block_index.set_y(iy + (CHUNK_RESOLUTION_HEIGHT as i32));
+                        chunk_index.set_y(chunk_index.get_y() - 1);
+                    } else if CHUNK_RESOLUTION_HEIGHT as i32 <= iy {
+                        block_index.set_y(iy - (CHUNK_RESOLUTION_HEIGHT as i32));
+                        chunk_index.set_y(chunk_index.get_y() + 1);
+                    }
+                    if iz < 0 {
+                        block_index.set_z(iz + (CHUNK_RESOLUTION_DEPTH as i32));
+                        chunk_index.set_z(chunk_index.get_z() - 1);
+                    } else if CHUNK_RESOLUTION_DEPTH as i32 <= iz {
+                        block_index.set_z(iz - (CHUNK_RESOLUTION_DEPTH as i32));
+                        chunk_index.set_z(chunk_index.get_z() + 1);
+                    }
+                    let mut cell = Block::Air;
+                    let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_index);
+
+                    if let Some(result_chunk) = chunk_option {
+                        // console_log!("chunk!");
+
+                        let block_option =
+                            result_chunk.get_block_option_by_block_index(&block_index);
+                        if let Some(result_cell) = block_option {
+                            cell = *result_cell;
+                            // console_log!("cell!");
+                            if cell == Block::Rock {
+                                // console_log!("rock!");
+                            }
+                        }
+                    }
+                    block_buffer.push(cell);
+                }
+            }
+        }
+        console_log!("{}", block_buffer.len());
+
+        block_buffer.clone()
+    }
+
+    pub fn draw(&mut self) {
+        let chunk_index_list: Vec<V3I> = self
+            .chunk_list
+            .iter()
+            .map(|chunk: &Chunk| chunk.chunk_index.clone())
+            .collect();
+        let block_buffer_list: Vec<Vec<Block>> = chunk_index_list
+            .iter()
+            .map(|chunk_index: &V3I| self.make_block_buffer(chunk_index))
+            .collect();
+        for (chunk, block_buffer) in self.chunk_list.iter_mut().zip(block_buffer_list.iter()) {
+            chunk.draw(&block_buffer);
         }
     }
 
@@ -86,7 +173,7 @@ impl Universe {
         self.get_chunk(i).geometry_buffer.color_list.as_ptr()
     }
     pub fn get_chunk_list_length(&self) -> usize {
-        CHUNK_LIST_LENGTH
+        self.chunk_list.len()
     }
     pub fn get_geometry_buffer_vertex_length(&self, i: usize) -> usize {
         self.get_chunk(i).geometry_buffer.position_list.len()
