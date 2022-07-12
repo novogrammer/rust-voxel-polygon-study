@@ -79,13 +79,13 @@ impl Universe {
         universe
     }
     pub fn update(&mut self) {
-        let mut neighbor_chunk_index_list = vec![];
+        let mut chunk_to_invalidate_list = vec![];
         for chunk in self.chunk_list.iter_mut() {
             let mut v = chunk.update();
-            neighbor_chunk_index_list.append(&mut v);
+            chunk_to_invalidate_list.append(&mut v);
         }
-        for neighbor_chunk_index in neighbor_chunk_index_list {
-            let chunk_option = self.get_mut_chunk_option_by_chunk_index(&neighbor_chunk_index);
+        for chunk_to_invalidate in chunk_to_invalidate_list {
+            let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_to_invalidate);
             if let Some(chunk) = chunk_option {
                 chunk.needs_draw = true;
             }

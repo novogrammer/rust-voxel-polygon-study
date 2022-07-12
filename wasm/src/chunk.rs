@@ -2,13 +2,9 @@ use wasm_bindgen::prelude::*;
 
 use cgmath::Vector3;
 
-use std::collections::HashSet;
-use std::iter::FromIterator;
-
 use crate::block::*;
 use crate::geometry::Geometry;
 use crate::geometry_buffer::GeometryBuffer;
-use crate::universe::*;
 use crate::v3f::V3F;
 use crate::v3i::V3I;
 use crate::vertex::Vertex;
@@ -74,7 +70,7 @@ impl Chunk {
         // };
         let mut block_list = vec![];
 
-        block_list.resize(BLOCK_LIST_LENGTH, Block::Rock);
+        block_list.resize(BLOCK_LIST_LENGTH, Block::Air);
 
         let geometry = Geometry {
             vertex_list: vec![],
@@ -133,7 +129,19 @@ impl Chunk {
         neighbor_chunk_index_list
     }
     pub fn update(&mut self) -> Vec<V3I> {
-        let mut neighbor_chunk_index_hash = HashSet::new();
+        let mut chunk_to_invalidate_list = vec![];
+        for iz in -1..(1 + 1) {
+            for iy in -1..(1 + 1) {
+                for ix in -1..(1 + 1) {
+                    let mut chunk_index = self.chunk_index.clone();
+                    chunk_index.set_x(chunk_index.get_x() + ix);
+                    chunk_index.set_y(chunk_index.get_y() + iy);
+                    chunk_index.set_z(chunk_index.get_z() + iz);
+                    chunk_to_invalidate_list.push((chunk_index, false))
+                }
+            }
+        }
+
         let mut i = 0;
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
@@ -148,16 +156,24 @@ impl Chunk {
                         *cell = next_cell;
 
                         let v = self.make_neighbor_chunk_index_list(ix, iy, iz);
-                        for chunk_index in &v {
-                            neighbor_chunk_index_hash.insert(*chunk_index);
+                        for chunk_to_invalidate in &mut chunk_to_invalidate_list {
+                            for chunk_index in &v {
+                                if chunk_to_invalidate.0 == *chunk_index {
+                                    chunk_to_invalidate.1 = true;
+                                }
+                            }
                         }
                     }
                     i += 1;
                 }
             }
         }
-        let neighbor_chunk_index_list = Vec::from_iter(neighbor_chunk_index_hash.into_iter());
-        neighbor_chunk_index_list
+        let chunk_to_invalidate_list: Vec<V3I> = chunk_to_invalidate_list
+            .iter()
+            .filter(|ci_and_i| ci_and_i.1 == true)
+            .map(|ci_and_i| ci_and_i.0)
+            .collect();
+        chunk_to_invalidate_list
     }
     pub fn get_block_option_by_block_index(&self, block_index: &V3I) -> Option<&Block> {
         let x = block_index.get_x();
