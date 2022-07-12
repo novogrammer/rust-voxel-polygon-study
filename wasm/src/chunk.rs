@@ -26,15 +26,15 @@ macro_rules! console_log {
   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
-// pub const CHUNK_RESOLUTION_WIDTH: usize = 32;
-// pub const CHUNK_RESOLUTION_HEIGHT: usize = 32;
-// pub const CHUNK_RESOLUTION_DEPTH: usize = 32;
+pub const CHUNK_RESOLUTION_WIDTH: usize = 32;
+pub const CHUNK_RESOLUTION_HEIGHT: usize = 32;
+pub const CHUNK_RESOLUTION_DEPTH: usize = 32;
 // pub const CHUNK_RESOLUTION_WIDTH: usize = 16;
 // pub const CHUNK_RESOLUTION_HEIGHT: usize = 16;
 // pub const CHUNK_RESOLUTION_DEPTH: usize = 16;
-pub const CHUNK_RESOLUTION_WIDTH: usize = 4;
-pub const CHUNK_RESOLUTION_HEIGHT: usize = 4;
-pub const CHUNK_RESOLUTION_DEPTH: usize = 4;
+// pub const CHUNK_RESOLUTION_WIDTH: usize = 4;
+// pub const CHUNK_RESOLUTION_HEIGHT: usize = 4;
+// pub const CHUNK_RESOLUTION_DEPTH: usize = 4;
 // pub const CHUNK_RESOLUTION_WIDTH: usize = 4;
 // pub const CHUNK_RESOLUTION_HEIGHT: usize = 4;
 // pub const CHUNK_RESOLUTION_DEPTH: usize = 4;
@@ -186,7 +186,28 @@ impl Chunk {
     }
     fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
         let mut vertex_list = vec![];
-        let mut count = 0;
+
+        let _mmm = Vector3::<f32>::new(-0.5, -0.5, -0.5);
+        let mmp = Vector3::<f32>::new(-0.5, -0.5, 0.5);
+        let _mpm = Vector3::<f32>::new(-0.5, 0.5, -0.5);
+        let mpp = Vector3::<f32>::new(-0.5, 0.5, 0.5);
+        let _pmm = Vector3::<f32>::new(0.5, -0.5, -0.5);
+        let pmp = Vector3::<f32>::new(0.5, -0.5, 0.5);
+        let _ppm = Vector3::<f32>::new(0.5, 0.5, -0.5);
+        let ppp = Vector3::<f32>::new(0.5, 0.5, 0.5);
+        let front_face_position_list = vec![mmp, pmp, mpp, ppp, mpp, pmp];
+        let front_face_normal = Vector3::<f32>::new(0.0, 0.0, 1.0);
+        let color_pink = Vector3::<f32>::new(1.0, 0.5, 0.5);
+        let color_lime = Vector3::<f32>::new(0.0, 1.0, 0.5);
+        let color_white = Vector3::<f32>::new(1.0, 1.0, 1.0);
+        let front_face_color_list = vec![
+            color_pink,
+            color_white,
+            color_white,
+            color_lime,
+            color_white,
+            color_white,
+        ];
 
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
@@ -201,43 +222,25 @@ impl Chunk {
                         + (iy + 1) * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
                         + (ix + 1);
                     let cell = block_buffer.get(i as usize).unwrap();
-                    let position = Vector3::<f32>::new(ix as f32, iy as f32, iz as f32);
+                    let position =
+                        Vector3::<f32>::new(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
                     // for now
-                    if *cell == Block::Rock {
-                        count += 1;
-                        vertex_list.push(Vertex {
-                            position: V3F::new(
-                                -0.5 + position.x,
-                                -0.5 + position.y,
-                                0.0 + position.z,
-                            ),
-                            normal: V3F::new(0.0, 0.0, 1.0),
-                            color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
-                        });
-                        vertex_list.push(Vertex {
-                            position: V3F::new(
-                                0.5 + position.x,
-                                -0.5 + position.y,
-                                0.0 + position.z,
-                            ),
-                            normal: V3F::new(0.0, 0.0, 1.0),
-                            color: V3F::new(255.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0),
-                        });
-                        vertex_list.push(Vertex {
-                            position: V3F::new(
-                                0.0 + position.x,
-                                0.5 + position.y,
-                                0.0 + position.z,
-                            ),
-                            normal: V3F::new(0.0, 0.0, 1.0),
-                            color: V3F::new(255.0 / 255.0, 0.0 / 255.0, 255.0 / 255.0),
-                        });
+                    if *cell != Block::Air {
+                        for (front_face_position, front_face_color) in front_face_position_list
+                            .iter()
+                            .zip(front_face_color_list.iter())
+                        {
+                            vertex_list.push(Vertex {
+                                position: V3F::from_cgmath(&(position + front_face_position)),
+                                normal: V3F::from_cgmath(&front_face_normal),
+                                color: V3F::from_cgmath(&front_face_color),
+                            });
+                        }
                     }
                 }
             }
         }
-        // console_log!("{}", count);
 
         self.geometry.vertex_list = vertex_list;
     }

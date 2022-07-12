@@ -14,6 +14,9 @@ macro_rules! console_log {
   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
+// pub const UNIVERSE_RESOLUTION_WIDTH: usize = 4;
+// pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 4;
+// pub const UNIVERSE_RESOLUTION_DEPTH: usize = 4;
 pub const UNIVERSE_RESOLUTION_WIDTH: usize = 2;
 pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 2;
 pub const UNIVERSE_RESOLUTION_DEPTH: usize = 2;
