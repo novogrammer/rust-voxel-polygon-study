@@ -218,7 +218,7 @@ impl Chunk {
         // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
         let color_white = vec3::<f32>(1.0, 1.0, 1.0);
         let front_face_color_list = vec![
-            color_pink,
+            color_white,
             color_white,
             color_white,
             color_white,

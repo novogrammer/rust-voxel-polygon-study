@@ -33,9 +33,23 @@ async function main(){
   camera.position.z = 5;
   const controls = new OrbitControls(camera, renderer.domElement);
 
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  const spotLight = new THREE.SpotLight(0xffffff, 1.2,1000,THREE.MathUtils.degToRad(30));
 
-  const material=new THREE.MeshBasicMaterial({
+  spotLight.position.set(50, 50, 50);
+  spotLight.lookAt(0,0,0);
+  scene.add(spotLight);
+
+
+  // const material=new THREE.MeshBasicMaterial({
+  //   color:0xffffff,
+  //   vertexColors:true,
+  // });
+  const material=new THREE.MeshStandardMaterial({
     color:0xffffff,
+    roughness:0.5,
+    metalness:0.3,
     vertexColors:true,
   });
   // const material=new THREE.MeshNormalMaterial({
