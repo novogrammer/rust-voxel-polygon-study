@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 
-use cgmath::Vector3;
+//use cgmath::{vec3, Matrix4, SquareMatrix, Transform, Transform3, Vector3};
+use cgmath::*;
 
 use crate::block::*;
 use crate::geometry::Geometry;
@@ -203,26 +204,35 @@ impl Chunk {
     fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
         let mut vertex_list = vec![];
 
-        let _mmm = Vector3::<f32>::new(-0.5, -0.5, -0.5);
-        let mmp = Vector3::<f32>::new(-0.5, -0.5, 0.5);
-        let _mpm = Vector3::<f32>::new(-0.5, 0.5, -0.5);
-        let mpp = Vector3::<f32>::new(-0.5, 0.5, 0.5);
-        let _pmm = Vector3::<f32>::new(0.5, -0.5, -0.5);
-        let pmp = Vector3::<f32>::new(0.5, -0.5, 0.5);
-        let _ppm = Vector3::<f32>::new(0.5, 0.5, -0.5);
-        let ppp = Vector3::<f32>::new(0.5, 0.5, 0.5);
+        // let mmm = vec3::<f32>(-0.5, -0.5, -0.5);
+        let mmp = vec3::<f32>(-0.5, -0.5, 0.5);
+        // let mpm = vec3::<f32>(-0.5, 0.5, -0.5);
+        let mpp = vec3::<f32>(-0.5, 0.5, 0.5);
+        // let pmm = vec3::<f32>(0.5, -0.5, -0.5);
+        let pmp = vec3::<f32>(0.5, -0.5, 0.5);
+        // let ppm = vec3::<f32>(0.5, 0.5, -0.5);
+        let ppp = vec3::<f32>(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp, mpp, pmp];
-        let front_face_normal = Vector3::<f32>::new(0.0, 0.0, 1.0);
-        let color_pink = Vector3::<f32>::new(1.0, 0.5, 0.5);
-        let color_lime = Vector3::<f32>::new(0.0, 1.0, 0.5);
-        let color_white = Vector3::<f32>::new(1.0, 1.0, 1.0);
+        let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
+        let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
+        // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
+        let color_white = vec3::<f32>(1.0, 1.0, 1.0);
         let front_face_color_list = vec![
             color_pink,
             color_white,
             color_white,
-            color_lime,
             color_white,
             color_white,
+            color_white,
+        ];
+
+        let matrix_for_direction_list = vec![
+            Matrix4::<f32>::identity(),
+            Matrix4::<f32>::from_angle_y(Deg(90.0)),
+            Matrix4::<f32>::from_angle_y(Deg(-90.0)),
+            Matrix4::<f32>::from_angle_y(Deg(180.0)),
+            Matrix4::<f32>::from_angle_x(Deg(90.0)),
+            Matrix4::<f32>::from_angle_x(Deg(-90.0)),
         ];
 
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
@@ -238,20 +248,27 @@ impl Chunk {
                         + (iy + 1) * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
                         + (ix + 1);
                     let cell = block_buffer.get(i as usize).unwrap();
-                    let position =
-                        Vector3::<f32>::new(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
+                    let position = vec3::<f32>(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
                     // for now
                     if *cell != Block::Air {
-                        for (front_face_position, front_face_color) in front_face_position_list
-                            .iter()
-                            .zip(front_face_color_list.iter())
-                        {
-                            vertex_list.push(Vertex {
-                                position: V3F::from_cgmath(&(position + front_face_position)),
-                                normal: V3F::from_cgmath(&front_face_normal),
-                                color: V3F::from_cgmath(&front_face_color),
-                            });
+                        for matrix_for_direction in &matrix_for_direction_list {
+                            for (front_face_position, front_face_color) in front_face_position_list
+                                .iter()
+                                .zip(front_face_color_list.iter())
+                            {
+                                vertex_list.push(Vertex {
+                                    position: V3F::from_cgmath(
+                                        &(position
+                                            + matrix_for_direction
+                                                .transform_vector(*front_face_position)),
+                                    ),
+                                    normal: V3F::from_cgmath(
+                                        &matrix_for_direction.transform_vector(front_face_normal),
+                                    ),
+                                    color: V3F::from_cgmath(&front_face_color),
+                                });
+                            }
                         }
                     }
                 }
