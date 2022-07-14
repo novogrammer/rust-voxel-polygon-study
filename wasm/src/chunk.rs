@@ -214,7 +214,7 @@ impl Chunk {
         let ppp = vec3::<f32>(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp, mpp, pmp];
         let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
-        let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
+        // let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
         // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
         let color_white = vec3::<f32>(1.0, 1.0, 1.0);
         let front_face_color_list = vec![
@@ -235,6 +235,12 @@ impl Chunk {
             Matrix4::<f32>::from_angle_x(Deg(-90.0)),
         ];
 
+        let toi = |ix: i32, iy: i32, iz: i32| {
+            (CHUNK_RESOLUTION_HEIGHT as i32 + 2) * (CHUNK_RESOLUTION_WIDTH as i32 + 2) * (iz + 1)
+                + (iy + 1) * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
+                + (ix + 1)
+        };
+
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
                 for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32) {
@@ -242,32 +248,36 @@ impl Chunk {
                     //     + iy * (CHUNK_RESOLUTION_WIDTH as i32)
                     //     + ix;
                     // let cell = self.block_list.get(i as usize).unwrap();
-                    let i = (CHUNK_RESOLUTION_HEIGHT as i32 + 2)
-                        * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
-                        * (iz + 1)
-                        + (iy + 1) * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
-                        + (ix + 1);
+                    let i = toi(ix, iy, iz);
                     let cell = block_buffer.get(i as usize).unwrap();
                     let position = vec3::<f32>(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
                     // for now
                     if *cell != Block::Air {
                         for matrix_for_direction in &matrix_for_direction_list {
-                            for (front_face_position, front_face_color) in front_face_position_list
-                                .iter()
-                                .zip(front_face_color_list.iter())
-                            {
-                                vertex_list.push(Vertex {
-                                    position: V3F::from_cgmath(
-                                        &(position
-                                            + matrix_for_direction
-                                                .transform_vector(*front_face_position)),
-                                    ),
-                                    normal: V3F::from_cgmath(
-                                        &matrix_for_direction.transform_vector(front_face_normal),
-                                    ),
-                                    color: V3F::from_cgmath(&front_face_color),
-                                });
+                            let normal = matrix_for_direction.transform_vector(front_face_normal);
+                            let next_index = toi(
+                                ix + (normal.x.round() as i32),
+                                iy + (normal.y.round() as i32),
+                                iz + (normal.z.round() as i32),
+                            );
+                            let next_cell = block_buffer.get(next_index as usize).unwrap();
+                            if *next_cell == Block::Air {
+                                for (front_face_position, front_face_color) in
+                                    front_face_position_list
+                                        .iter()
+                                        .zip(front_face_color_list.iter())
+                                {
+                                    vertex_list.push(Vertex {
+                                        position: V3F::from_cgmath(
+                                            &(position
+                                                + matrix_for_direction
+                                                    .transform_vector(*front_face_position)),
+                                        ),
+                                        normal: V3F::from_cgmath(&normal),
+                                        color: V3F::from_cgmath(&front_face_color),
+                                    });
+                                }
                             }
                         }
                     }
