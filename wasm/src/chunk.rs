@@ -202,7 +202,7 @@ impl Chunk {
         return self.block_list.get(i as usize);
     }
     fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
-        let mut vertex_list = vec![];
+        let mut vertex_list: Vec<Vertex> = vec![];
 
         // let mmm = vec3::<f32>(-0.5, -0.5, -0.5);
         let mmp = vec3::<f32>(-0.5, -0.5, 0.5);
@@ -212,7 +212,9 @@ impl Chunk {
         let pmp = vec3::<f32>(0.5, -0.5, 0.5);
         // let ppm = vec3::<f32>(0.5, 0.5, -0.5);
         let ppp = vec3::<f32>(0.5, 0.5, 0.5);
-        let front_face_position_list = vec![mmp, pmp, mpp, ppp, mpp, pmp];
+        let front_face_position_list = vec![mmp, pmp, mpp, ppp];
+        let front_face_index_list: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
+        let front_face_index_list_flipped: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
         // let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
         // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
@@ -240,6 +242,14 @@ impl Chunk {
                 + (iy + 1) * (CHUNK_RESOLUTION_WIDTH as i32 + 2)
                 + (ix + 1)
         };
+        // see https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
+        let vertex_a_o = |side1: i32, side2: i32, corner: i32| {
+            if side1 != 0 && side2 != 0 {
+                return 0;
+            }
+            return 3 - (side1 + side2 + corner);
+        };
+        let is_flipped_quad = |a00: i32, a01: i32, a10: i32, a11: i32| a00 + a11 > a01 + a10;
 
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
@@ -263,20 +273,27 @@ impl Chunk {
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             if *next_cell == Block::Air {
-                                for (front_face_position, front_face_color) in
-                                    front_face_position_list
-                                        .iter()
-                                        .zip(front_face_color_list.iter())
-                                {
-                                    vertex_list.push(Vertex {
+                                let quad_vertex_list: Vec<Vertex> = front_face_position_list
+                                    .iter()
+                                    .map(|front_face_position| Vertex {
                                         position: V3F::from_cgmath(
                                             &(position
                                                 + matrix_for_direction
                                                     .transform_vector(*front_face_position)),
                                         ),
                                         normal: V3F::from_cgmath(&normal),
-                                        color: V3F::from_cgmath(&front_face_color),
-                                    });
+                                        color: V3F::from_cgmath(&color_white),
+                                    })
+                                    .collect();
+                                let face_index_list = if true {
+                                    &front_face_index_list
+                                } else {
+                                    &front_face_index_list_flipped
+                                };
+                                for front_face_index in face_index_list {
+                                    vertex_list.push(
+                                        quad_vertex_list.get(*front_face_index).unwrap().clone(),
+                                    );
                                 }
                             }
                         }
