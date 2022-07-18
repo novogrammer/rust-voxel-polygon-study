@@ -168,9 +168,12 @@ impl Chunk {
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
                 for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32) {
+                    let block_index = V3I::new(ix, iy, iz);
+                    let position = self.calc_position_by_index(&block_index);
+                    let position = position.to_cgmath::<f32>();
                     let cell = self.block_list.get_mut(i).unwrap();
                     let mut next_cell = Block::Air;
-                    if iz + iy + ix < CHUNK_RESOLUTION_WIDTH as i32 {
+                    if position.magnitude() < CHUNK_RESOLUTION_WIDTH as f32 {
                         next_cell = Block::Rock;
                     }
                     if *cell != next_cell {
