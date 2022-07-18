@@ -1,4 +1,7 @@
-use cgmath::Vector3;
+use cgmath::{
+    num_traits::{FromPrimitive, ToPrimitive},
+    Vector3,
+};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -34,14 +37,24 @@ impl V3F {
 }
 
 impl V3F {
-    pub fn from_cgmath(v: &Vector3<f32>) -> V3F {
+    pub fn from_cgmath<T>(v: &Vector3<T>) -> V3F
+    where
+        T: ToPrimitive,
+    {
         V3F {
-            x: v.x,
-            y: v.y,
-            z: v.z,
+            x: v.x.to_f32().unwrap(),
+            y: v.y.to_f32().unwrap(),
+            z: v.z.to_f32().unwrap(),
         }
     }
-    pub fn to_cgmath(&self) -> Vector3<f32> {
-        Vector3::<f32>::new(self.x, self.y, self.z)
+    pub fn to_cgmath<T>(&self) -> Vector3<T>
+    where
+        T: FromPrimitive,
+    {
+        Vector3::<T>::new(
+            T::from_f32(self.x).unwrap(),
+            T::from_f32(self.y).unwrap(),
+            T::from_f32(self.z).unwrap(),
+        )
     }
 }

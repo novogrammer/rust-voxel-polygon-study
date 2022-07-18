@@ -1,3 +1,7 @@
+use cgmath::{
+    num_traits::{FromPrimitive, ToPrimitive},
+    Vector3,
+};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -29,5 +33,28 @@ impl V3I {
     }
     pub fn set_z(&mut self, z: i32) {
         self.z = z;
+    }
+}
+
+impl V3I {
+    pub fn from_cgmath<T>(v: &Vector3<T>) -> V3I
+    where
+        T: ToPrimitive,
+    {
+        V3I {
+            x: v.x.to_i32().unwrap(),
+            y: v.y.to_i32().unwrap(),
+            z: v.z.to_i32().unwrap(),
+        }
+    }
+    pub fn to_cgmath<T>(&self) -> Vector3<T>
+    where
+        T: FromPrimitive,
+    {
+        Vector3::<T>::new(
+            T::from_i32(self.x).unwrap(),
+            T::from_i32(self.y).unwrap(),
+            T::from_i32(self.z).unwrap(),
+        )
     }
 }
