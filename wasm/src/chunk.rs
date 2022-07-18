@@ -310,15 +310,18 @@ impl Chunk {
                         .transform_vector(front_face_position.mul_element_wise(multiplier))),
             ))
         };
-        let index_to_ao_not_air = |index| match self.get_block_option_by_block_index(&index) {
-            Some(block) => {
-                if *block != Block::Air {
-                    1
-                } else {
-                    0
+        let index_to_ao_not_air = |index: V3I| {
+            let i = toi(index.get_x(), index.get_y(), index.get_z());
+            match block_buffer.get(i as usize) {
+                Some(block) => {
+                    if *block != Block::Air {
+                        1
+                    } else {
+                        0
+                    }
                 }
+                _ => 0,
             }
-            _ => 0,
         };
 
         let is_flipped_quad = |a00: i32, a01: i32, a10: i32, a11: i32| a00 + a11 > a01 + a10;
