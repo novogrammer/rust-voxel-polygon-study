@@ -1,3 +1,5 @@
+use std::env::var;
+
 use wasm_bindgen::prelude::*;
 
 //use cgmath::{vec3, Matrix4, SquareMatrix, Transform, Transform3, Vector3};
@@ -255,20 +257,20 @@ impl Chunk {
         // let ppm = vec3::<f32>(0.5, 0.5, -0.5);
         let ppp = vec3::<f32>(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp];
-        let front_face_index_list: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
-        let front_face_index_list_flipped: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
+        let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
+        let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
         let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
         // let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
         // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
-        let color_white = vec3::<f32>(1.0, 1.0, 1.0);
-        let front_face_color_list = vec![
-            color_white,
-            color_white,
-            color_white,
-            color_white,
-            color_white,
-            color_white,
-        ];
+        // let color_white = vec3::<f32>(1.0, 1.0, 1.0);
+        // let front_face_color_list = vec![
+        //     color_white,
+        //     color_white,
+        //     color_white,
+        //     color_white,
+        //     color_white,
+        //     color_white,
+        // ];
 
         let matrix_for_direction_list = vec![
             Matrix4::<f32>::identity(),
@@ -291,6 +293,34 @@ impl Chunk {
             }
             return 3 - (side1 + side2 + corner);
         };
+        let make_ao_color = |ao| match ao {
+            0 => V3F::new(0.25, 0.25, 0.25),
+            1 => V3F::new(0.5, 0.5, 0.5),
+            2 => V3F::new(0.75, 0.75, 0.75),
+            3 => V3F::new(1.0, 1.0, 1.0),
+            _ => V3F::new(0.0, 0.0, 0.0),
+        };
+        let calc_index_for_ao = |front_face_position: &Vector3<f32>,
+                                 multiplier: Vector3<f32>,
+                                 matrix_for_direction: &Matrix4<f32>,
+                                 position: &Vector3<f32>| {
+            self.calc_index_by_position(&V3F::from_cgmath(
+                &(position
+                    + matrix_for_direction
+                        .transform_vector(front_face_position.mul_element_wise(multiplier))),
+            ))
+        };
+        let index_to_ao_not_air = |index| match self.get_block_option_by_block_index(&index) {
+            Some(block) => {
+                if *block != Block::Air {
+                    1
+                } else {
+                    0
+                }
+            }
+            _ => 0,
+        };
+
         let is_flipped_quad = |a00: i32, a01: i32, a10: i32, a11: i32| a00 + a11 > a01 + a10;
 
         for iz in 0..(CHUNK_RESOLUTION_DEPTH as i32) {
@@ -315,26 +345,68 @@ impl Chunk {
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             if *next_cell == Block::Air {
-                                let quad_vertex_list: Vec<Vertex> = front_face_position_list
+                                let quad_vertex_and_ao_list: Vec<(Vertex, i32)> =
+                                    front_face_position_list
+                                        .iter()
+                                        .map(|front_face_position| {
+                                            let vertex_position = V3F::from_cgmath(
+                                                &(position
+                                                    + matrix_for_direction
+                                                        .transform_vector(*front_face_position)),
+                                            );
+                                            let side1_index = calc_index_for_ao(
+                                                front_face_position,
+                                                vec3::<f32>(2.0, 0.0, 2.0),
+                                                matrix_for_direction,
+                                                &position,
+                                            );
+                                            let side1 = index_to_ao_not_air(side1_index);
+                                            let side2_index = calc_index_for_ao(
+                                                front_face_position,
+                                                vec3::<f32>(0.0, 2.0, 2.0),
+                                                matrix_for_direction,
+                                                &position,
+                                            );
+                                            let side2 = index_to_ao_not_air(side2_index);
+                                            let corner_index = calc_index_for_ao(
+                                                front_face_position,
+                                                vec3::<f32>(2.0, 2.0, 2.0),
+                                                matrix_for_direction,
+                                                &position,
+                                            );
+                                            let corner = index_to_ao_not_air(corner_index);
+                                            let ao = vertex_a_o(side1, side2, corner);
+                                            (
+                                                Vertex {
+                                                    position: vertex_position,
+                                                    normal: V3F::from_cgmath(&normal),
+                                                    color: make_ao_color(ao),
+                                                },
+                                                ao,
+                                            )
+                                        })
+                                        .collect();
+                                let quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
                                     .iter()
-                                    .map(|front_face_position| Vertex {
-                                        position: V3F::from_cgmath(
-                                            &(position
-                                                + matrix_for_direction
-                                                    .transform_vector(*front_face_position)),
-                                        ),
-                                        normal: V3F::from_cgmath(&normal),
-                                        color: V3F::from_cgmath(&color_white),
-                                    })
+                                    .map(|(quad_vertex, ao)| quad_vertex)
                                     .collect();
-                                let face_index_list = if true {
+                                let ao_list: Vec<i32> = quad_vertex_and_ao_list
+                                    .iter()
+                                    .map(|(quad_vertex, ao)| *ao)
+                                    .collect();
+                                let face_index_list = if is_flipped_quad(
+                                    *ao_list.get(0).unwrap(),
+                                    *ao_list.get(1).unwrap(),
+                                    *ao_list.get(2).unwrap(),
+                                    *ao_list.get(3).unwrap(),
+                                ) {
                                     &front_face_index_list
                                 } else {
                                     &front_face_index_list_flipped
                                 };
                                 for front_face_index in face_index_list {
                                     vertex_list.push(
-                                        quad_vertex_list.get(*front_face_index).unwrap().clone(),
+                                        *quad_vertex_list.get(*front_face_index).unwrap().clone(),
                                     );
                                 }
                             }
