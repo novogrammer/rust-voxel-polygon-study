@@ -95,15 +95,15 @@ impl Chunk {
         }
     }
 
-    pub fn make_neighbor_chunk_index_list(&mut self, ix: i32, iy: i32, iz: i32) -> Vec<V3I> {
+    pub fn make_neighbor_chunk_index_list(&mut self, block_index: &V3I) -> Vec<V3I> {
         let mut neighbor_chunk_index_list = vec![];
 
         for inz in -1..(1 + 1) {
-            let z = iz + inz;
+            let z = block_index.get_z() + inz;
             for iny in -1..(1 + 1) {
-                let y = iy + iny;
+                let y = block_index.get_y() + iny;
                 for inx in -1..(1 + 1) {
-                    let x = ix + inx;
+                    let x = block_index.get_x() + inx;
                     let mut neighbor_chunk_index = self.chunk_index.clone();
                     if x < 0 {
                         neighbor_chunk_index.set_x(neighbor_chunk_index.get_x() - 1);
@@ -155,8 +155,8 @@ impl Chunk {
                     if *cell != next_cell {
                         // needs_draw
                         *cell = next_cell;
-
-                        let v = self.make_neighbor_chunk_index_list(ix, iy, iz);
+                        let block_index = V3I::new(ix, iy, iz);
+                        let v = self.make_neighbor_chunk_index_list(&block_index);
                         for chunk_to_invalidate in &mut chunk_to_invalidate_list {
                             for chunk_index in &v {
                                 if chunk_to_invalidate.0 == *chunk_index {
