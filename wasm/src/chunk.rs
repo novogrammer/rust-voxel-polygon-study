@@ -95,7 +95,7 @@ impl Chunk {
         }
     }
 
-    pub fn calc_index_by_position(&self, position: &V3F) -> V3I {
+    pub fn calc_index_by_global_position(&self, position: &V3F) -> V3I {
         let o = self.origin.to_cgmath();
         let p = position.to_cgmath();
         let block_index = p - vec3::<f32>(0.5, 0.5, 0.5) - o;
@@ -105,7 +105,7 @@ impl Chunk {
             block_index.z.round() as i32,
         )
     }
-    pub fn calc_position_by_index(&self, block_index: &V3I) -> V3F {
+    pub fn calc_global_position_by_index(&self, block_index: &V3I) -> V3F {
         let o = self.origin.to_cgmath();
         let p = vec3(
             block_index.get_x() as f32,
@@ -169,7 +169,7 @@ impl Chunk {
             for iy in 0..(CHUNK_RESOLUTION_HEIGHT as i32) {
                 for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32) {
                     let block_index = V3I::new(ix, iy, iz);
-                    let position = self.calc_position_by_index(&block_index);
+                    let position = self.calc_global_position_by_index(&block_index);
                     let position = position.to_cgmath::<f32>();
                     let cell = self.block_list.get_mut(i).unwrap();
                     let mut next_cell = Block::Air;
