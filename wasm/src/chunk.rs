@@ -95,6 +95,27 @@ impl Chunk {
         }
     }
 
+    pub fn calc_index_by_position(&self, position: &V3F) -> V3I {
+        let o = self.origin.to_cgmath();
+        let p = position.to_cgmath();
+        let block_index = p - vec3::<f32>(0.5, 0.5, 0.5) - o;
+        V3I::new(
+            block_index.x.round() as i32,
+            block_index.y.round() as i32,
+            block_index.z.round() as i32,
+        )
+    }
+    pub fn calc_position_by_index(&self, block_index: &V3I) -> V3F {
+        let o = self.origin.to_cgmath();
+        let p = vec3(
+            block_index.get_x() as f32,
+            block_index.get_y() as f32,
+            block_index.get_z() as f32,
+        );
+        let position = p + o + vec3::<f32>(0.5, 0.5, 0.5);
+        V3F::from_cgmath(&position)
+    }
+
     pub fn make_neighbor_chunk_index_list(&mut self, block_index: &V3I) -> Vec<V3I> {
         let mut neighbor_chunk_index_list = vec![];
 
