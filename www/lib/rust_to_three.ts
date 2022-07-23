@@ -6,8 +6,8 @@ import * as THREE from "three";
 export function updateBufferGeometry(universe:Universe,i:number,bufferGeometry:THREE.BufferGeometry){
 
   const version = universe.get_geometry_version(i);
-  console.log(`bufferGeometry.userData.version:${bufferGeometry.userData.version}`);
-  console.log(`version:${version}`);
+  // console.log(`bufferGeometry.userData.version:${bufferGeometry.userData.version}`);
+  // console.log(`version:${version}`);
   if(bufferGeometry.userData.version == version){
     return;
   }
@@ -33,6 +33,12 @@ export function updateBufferGeometry(universe:Universe,i:number,bufferGeometry:T
     const colorList =  new Float32Array(memory.buffer,colorListPointer,vertex_length * 3);
     const colorAttribute=new THREE.BufferAttribute(colorList,3);
     bufferGeometry.setAttribute("color",colorAttribute);
+  }
+  {
+    const uvListPointer=universe.get_geometry_buffer_uv_list_ptr(i);
+    const uvList =  new Float32Array(memory.buffer,uvListPointer,vertex_length * 2);
+    const uvAttribute=new THREE.BufferAttribute(uvList,2);
+    bufferGeometry.setAttribute("uv",uvAttribute);
   }
   bufferGeometry.userData.version=version;
 }

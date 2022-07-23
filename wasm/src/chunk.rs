@@ -1,4 +1,5 @@
 use std::env::var;
+use std::mem::swap;
 
 use wasm_bindgen::prelude::*;
 
@@ -8,6 +9,7 @@ use cgmath::*;
 use crate::block::*;
 use crate::geometry::Geometry;
 use crate::geometry_buffer::GeometryBuffer;
+use crate::v2f::V2F;
 use crate::v3f::V3F;
 use crate::v3i::V3I;
 use crate::vertex::Vertex;
@@ -82,6 +84,7 @@ impl Chunk {
             position_list: vec![],
             normal_list: vec![],
             color_list: vec![],
+            uv_list: vec![],
         };
         Chunk {
             // parent,
@@ -257,6 +260,11 @@ impl Chunk {
         // let ppm = vec3::<f32>(0.5, 0.5, -0.5);
         let ppp = vec3::<f32>(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp];
+        let mm = vec2::<f32>(0.0, 0.0);
+        let mp = vec2::<f32>(1.0, 0.0);
+        let pm = vec2::<f32>(0.0, 1.0);
+        let pp = vec2::<f32>(1.0, 1.0);
+        let front_face_uv_list = vec![mm, pm, mp, pp];
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
         let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
@@ -351,12 +359,14 @@ impl Chunk {
                                 let quad_vertex_and_ao_list: Vec<(Vertex, i32)> =
                                     front_face_position_list
                                         .iter()
-                                        .map(|front_face_position| {
+                                        .zip(front_face_uv_list.iter())
+                                        .map(|(front_face_position, front_face_uv)| {
                                             let vertex_position = V3F::from_cgmath(
                                                 &(position
                                                     + matrix_for_direction
                                                         .transform_vector(*front_face_position)),
                                             );
+                                            let uv = front_face_uv;
                                             let side1_index = calc_index_for_ao(
                                                 front_face_position,
                                                 vec3::<f32>(2.0, 0.0, 2.0),
@@ -384,18 +394,19 @@ impl Chunk {
                                                     position: vertex_position,
                                                     normal: V3F::from_cgmath(&normal),
                                                     color: make_ao_color(ao),
+                                                    uv: V2F::from_cgmath(uv),
                                                 },
                                                 ao,
                                             )
                                         })
                                         .collect();
-                                let quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
+                                let mut quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
                                     .iter()
-                                    .map(|(quad_vertex, ao)| quad_vertex)
+                                    .map(|(quad_vertex, _ao)| quad_vertex)
                                     .collect();
                                 let ao_list: Vec<i32> = quad_vertex_and_ao_list
                                     .iter()
-                                    .map(|(quad_vertex, ao)| *ao)
+                                    .map(|(_quad_vertex, ao)| *ao)
                                     .collect();
                                 let face_index_list = if is_flipped_quad(
                                     *ao_list.get(0).unwrap(),
@@ -422,17 +433,25 @@ impl Chunk {
         self.geometry.vertex_list = vertex_list;
     }
     fn copy_to_geometry_buffer(&mut self) {
+        let l = self.geometry.vertex_list.len();
         let mut position_list = vec![];
+        position_list.reserve(l);
         let mut normal_list = vec![];
+        normal_list.reserve(l);
         let mut color_list = vec![];
+        color_list.reserve(l);
+        let mut uv_list = vec![];
+        uv_list.reserve(l);
         for vertex in &self.geometry.vertex_list {
             position_list.push(vertex.position.clone());
             normal_list.push(vertex.normal.clone());
             color_list.push(vertex.color.clone());
+            uv_list.push(vertex.uv.clone());
         }
         self.geometry_buffer.position_list = position_list;
         self.geometry_buffer.normal_list = normal_list;
         self.geometry_buffer.color_list = color_list;
+        self.geometry_buffer.uv_list = uv_list;
         self.version += 1;
     }
     pub fn draw(&mut self, block_buffer: &Vec<Block>) {

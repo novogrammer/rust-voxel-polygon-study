@@ -2,6 +2,7 @@ import {Universe,V3F} from "rust-voxel-polygon-study-wasm";
 
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
+import {EXRLoader} from "three/examples/jsm/loaders/EXRLoader.js";
 
 import { updateBufferGeometry } from "./rust_to_three";
 
@@ -54,15 +55,38 @@ export default class App{
     spotLight.lookAt(0,0,0);
     scene.add(spotLight);
   
-  
+    const baseDir="/textures/coast_sand_rocks_02_1k/";
+
+    const loadEXRTextureAsync=(filename:string)=>{
+      return new Promise<THREE.Texture>((resolve)=>{
+        new EXRLoader().setPath(baseDir).load(filename,(texture)=>{
+          resolve(texture);
+        });
+      });
+    };
+    const loadTextureAsync=(filename:string)=>{
+      return new Promise<THREE.Texture>((resolve)=>{
+        new THREE.TextureLoader().setPath(baseDir).load(filename,(texture)=>{
+          resolve(texture);
+        });
+      });
+    };
+
+    const diff=await loadTextureAsync("coast_sand_rocks_02_diff_1k.jpg");
+    // const disp=await loadTextureAsync("coast_sand_rocks_02_disp_1k.png");
+    const nor=await loadEXRTextureAsync("coast_sand_rocks_02_nor_gl_1k.exr");
+    const rough=await loadEXRTextureAsync("coast_sand_rocks_02_rough_1k.exr");
+
     // const material=new THREE.MeshBasicMaterial({
     //   color:0xffffff,
     //   vertexColors:true,
     // });
     const material=new THREE.MeshStandardMaterial({
-      color:0xffffff,
-      roughness:0.5,
-      metalness:0.3,
+      map:diff,
+      roughnessMap:rough,
+      metalness:0,
+      normalMap:nor,
+      // displacementMap:disp,
       vertexColors:true,
     });
     // const material=new THREE.MeshNormalMaterial({
@@ -134,7 +158,7 @@ export default class App{
       const bufferGeometry=bufferGeometryList[i];
   
       updateBufferGeometry(universe,i,bufferGeometry);
-      console.log(bufferGeometry);
+      // console.log(bufferGeometry);
     }
 
 

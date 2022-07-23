@@ -21,6 +21,7 @@ mod chunk;
 mod geometry;
 mod geometry_buffer;
 mod universe;
+mod v2f;
 mod v3f;
 mod v3i;
 mod vertex;

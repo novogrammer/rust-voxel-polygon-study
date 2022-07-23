@@ -1,4 +1,4 @@
-use crate::{block::*, chunk::*, utils, v3f::V3F, v3i::V3I};
+use crate::{block::*, chunk::*, utils, v2f::V2F, v3f::V3F, v3i::V3I};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -174,6 +174,9 @@ impl Universe {
     }
     pub fn get_geometry_buffer_color_list_ptr(&self, i: usize) -> *const V3F {
         self.get_chunk(i).geometry_buffer.color_list.as_ptr()
+    }
+    pub fn get_geometry_buffer_uv_list_ptr(&self, i: usize) -> *const V2F {
+        self.get_chunk(i).geometry_buffer.uv_list.as_ptr()
     }
     pub fn get_chunk_list_length(&self) -> usize {
         self.chunk_list.len()
