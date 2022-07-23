@@ -17,6 +17,7 @@ export default class App{
     scene:THREE.Scene,
     camera:THREE.Camera,
     material:THREE.Material,
+    bufferGeometryList:THREE.BufferGeometry[],
     controls:OrbitControls,
   };
   constructor(){
@@ -76,15 +77,20 @@ export default class App{
   
     
     const l=universe.get_chunk_list_length();
+    const bufferGeometryList=[];
     for(let i=0;i<l;i++){
       const bufferGeometry = new THREE.BufferGeometry();
-  
-      updateBufferGeometry(universe,i,bufferGeometry);
-      console.log(bufferGeometry);
+      bufferGeometryList.push(bufferGeometry);
       const mesh=new THREE.Mesh(bufferGeometry,material);
       const origin=universe.get_chunk_origin(i);
       mesh.position.set(origin.get_x(),origin.get_y(),origin.get_z());
       scene.add(mesh);
+    }
+    for(let i=0;i<l;i++){
+      const bufferGeometry=bufferGeometryList[i];
+  
+      updateBufferGeometry(universe,i,bufferGeometry);
+      console.log(bufferGeometry);
     }
   
 
@@ -95,25 +101,45 @@ export default class App{
       camera,
       material,
       controls,
+      bufferGeometryList,
     };
   }
   async setupEventsAsync():Promise<void>{
     if(!this.three){
       throw new Error("this.three is null");
     }
-    const {renderer,scene,camera}=this.three;
+    const {renderer}=this.three;
 
-    function render() {
-      renderer.render(scene,camera);
-    }
-  
-    renderer.setAnimationLoop( render );
+    renderer.setAnimationLoop( this.onRender.bind(this) );
 
   }
   async setupAsync():Promise<void>{
     await this.setupVoxelAsync();
     await this.setupThreeAsync();
     await this.setupEventsAsync();
+  }
+  onRender(time: DOMHighResTimeStamp, frame: XRFrame){
+    if(!this.voxel){
+      throw new Error("this.voxel is null");
+    }
+    const {universe}=this.voxel;
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
+    const {renderer,scene,camera,bufferGeometryList}=this.three;
+
+
+    const l=universe.get_chunk_list_length();
+    for(let i=0;i<l;i++){
+      const bufferGeometry=bufferGeometryList[i];
+  
+      updateBufferGeometry(universe,i,bufferGeometry);
+      console.log(bufferGeometry);
+    }
+
+
+    renderer.render(scene,camera);
+
   }
 
   async destroyVoxelAsync():Promise<void>{
