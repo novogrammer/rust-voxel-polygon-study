@@ -9,16 +9,29 @@ import { updateBufferGeometry } from "./rust_to_three";
 
 export default class App{
   setupPromise:Promise<void>;
+  voxel?:{
+    universe:Universe;
+  }
+  three?:{
+    renderer:THREE.WebGLRenderer,
+    scene:THREE.Scene,
+    camera:THREE.Camera,
+    material:THREE.Material,
+    controls:OrbitControls,
+  };
   constructor(){
     this.setupPromise=this.setupAsync();
   }
-  async setupAsync():Promise<void>{
+  async setupVoxelAsync(){
     const universe=Universe.new();
-    const l=universe.get_chunk_list_length();
-  
     universe.update();
     universe.draw();
-  
+
+    this.voxel={
+      universe,
+    }
+  }
+  async setupThreeAsync(){
     const renderer=new THREE.WebGLRenderer({
       antialias: true,
       canvas:document.querySelector("#View") as HTMLCanvasElement,
@@ -55,7 +68,14 @@ export default class App{
     //   color:0xffffff,
     //   vertexColors:true,
     // });
+
+    if(!this.voxel){
+      throw new Error("this.voxel is null");
+    }
+    const {universe}=this.voxel;
+  
     
+    const l=universe.get_chunk_list_length();
     for(let i=0;i<l;i++){
       const bufferGeometry = new THREE.BufferGeometry();
   
@@ -67,13 +87,56 @@ export default class App{
       scene.add(mesh);
     }
   
+
+
+    this.three={
+      renderer,
+      scene,
+      camera,
+      material,
+      controls,
+    };
+  }
+  async setupEventsAsync():Promise<void>{
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
+    const {renderer,scene,camera}=this.three;
+
     function render() {
       renderer.render(scene,camera);
     }
   
     renderer.setAnimationLoop( render );
-  
+
+  }
+  async setupAsync():Promise<void>{
+    await this.setupVoxelAsync();
+    await this.setupThreeAsync();
+    await this.setupEventsAsync();
+  }
+
+  async destroyVoxelAsync():Promise<void>{
+    if(!this.voxel){
+      return;
+    }
+    const {universe}=this.voxel;
     universe.free();
-  
+    this.voxel=undefined;
+  }
+  async destroyThreeAsync():Promise<void>{
+  }
+  async destroyEventsAsync():Promise<void>{
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
+    const {renderer}=this.three;
+    renderer.setAnimationLoop(null);
+  }
+  async destroyAsync():Promise<void>{
+    await this.setupPromise;
+    await this.destroyEventsAsync();
+    await this.destroyThreeAsync();
+    await this.destroyVoxelAsync();
   }
 }
