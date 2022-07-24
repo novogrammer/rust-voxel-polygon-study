@@ -14,12 +14,18 @@ macro_rules! console_log {
   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
+// pub const UNIVERSE_RESOLUTION_WIDTH: usize = 8;
+// pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 8;
+// pub const UNIVERSE_RESOLUTION_DEPTH: usize = 8;
 // pub const UNIVERSE_RESOLUTION_WIDTH: usize = 4;
 // pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 4;
 // pub const UNIVERSE_RESOLUTION_DEPTH: usize = 4;
 pub const UNIVERSE_RESOLUTION_WIDTH: usize = 2;
 pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 2;
 pub const UNIVERSE_RESOLUTION_DEPTH: usize = 2;
+// pub const UNIVERSE_RESOLUTION_WIDTH: usize = 1;
+// pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 1;
+// pub const UNIVERSE_RESOLUTION_DEPTH: usize = 1;
 pub const CHUNK_LIST_LENGTH: usize =
     UNIVERSE_RESOLUTION_WIDTH * UNIVERSE_RESOLUTION_HEIGHT * UNIVERSE_RESOLUTION_DEPTH;
 
@@ -189,6 +195,10 @@ impl Universe {
     }
     pub fn get_geometry_version(&self, i: usize) -> u32 {
         self.get_chunk(i).version
+    }
+    pub fn get_max_geometry_vertex_length(&self) -> u32 {
+        // 交互に存在する場合が最悪のパターン
+        BLOCK_LIST_LENGTH as u32 / 2 * 6 * (3 * 2)
     }
 }
 

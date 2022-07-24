@@ -24,6 +24,9 @@ macro_rules! console_log {
   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
+// pub const CHUNK_RESOLUTION_WIDTH: usize = 64;
+// pub const CHUNK_RESOLUTION_HEIGHT: usize = 64;
+// pub const CHUNK_RESOLUTION_DEPTH: usize = 64;
 pub const CHUNK_RESOLUTION_WIDTH: usize = 32;
 pub const CHUNK_RESOLUTION_HEIGHT: usize = 32;
 pub const CHUNK_RESOLUTION_DEPTH: usize = 32;
@@ -100,9 +103,9 @@ impl Chunk {
         let p = position.to_cgmath();
         let block_index = p - vec3::<f32>(0.5, 0.5, 0.5);
         V3I::new(
-            block_index.x.round() as i32,
-            block_index.y.round() as i32,
-            block_index.z.round() as i32,
+            (block_index.x + 0.5).floor() as i32,
+            (block_index.y + 0.5).floor() as i32,
+            (block_index.z + 0.5).floor() as i32,
         )
     }
 
@@ -111,9 +114,9 @@ impl Chunk {
         let p = position.to_cgmath();
         let block_index = p - vec3::<f32>(0.5, 0.5, 0.5) - o;
         V3I::new(
-            block_index.x.round() as i32,
-            block_index.y.round() as i32,
-            block_index.z.round() as i32,
+            (block_index.x + 0.5).floor() as i32,
+            (block_index.y + 0.5).floor() as i32,
+            (block_index.z + 0.5).floor() as i32,
         )
     }
     pub fn calc_position_by_index(&self, block_index: &V3I) -> V3F {
@@ -138,6 +141,7 @@ impl Chunk {
 
     pub fn make_neighbor_chunk_index_list(&mut self, block_index: &V3I) -> Vec<V3I> {
         let mut neighbor_chunk_index_list = vec![];
+        neighbor_chunk_index_list.reserve(3 * 3 * 3);
 
         for inz in -1..(1 + 1) {
             let z = block_index.get_z() + inz;
@@ -247,6 +251,19 @@ impl Chunk {
             + x;
         return self.block_list.get(i as usize);
     }
+    fn calc_index_for_ao(
+        &mut self,
+        front_face_position: &Vector3<f32>,
+        multiplier: Vector3<f32>,
+        matrix_for_direction: &Matrix4<f32>,
+        position: &Vector3<f32>,
+    ) -> V3I {
+        self.calc_index_by_position(&V3F::from_cgmath(
+            &(position
+                + matrix_for_direction
+                    .transform_vector(front_face_position.mul_element_wise(multiplier))),
+        ))
+    }
     fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
         let mut vertex_list: Vec<Vertex> = vec![];
 
@@ -307,16 +324,7 @@ impl Chunk {
             3 => V3F::new(1.0, 1.0, 1.0),
             _ => V3F::new(0.0, 0.0, 0.0),
         };
-        let calc_index_for_ao = |front_face_position: &Vector3<f32>,
-                                 multiplier: Vector3<f32>,
-                                 matrix_for_direction: &Matrix4<f32>,
-                                 position: &Vector3<f32>| {
-            self.calc_index_by_position(&V3F::from_cgmath(
-                &(position
-                    + matrix_for_direction
-                        .transform_vector(front_face_position.mul_element_wise(multiplier))),
-            ))
-        };
+
         let index_to_ao_not_air = |index: V3I| {
             let i = toi(index.get_x(), index.get_y(), index.get_z());
             match block_buffer.get(i as usize) {
@@ -349,9 +357,9 @@ impl Chunk {
                         for matrix_for_direction in &matrix_for_direction_list {
                             let normal = matrix_for_direction.transform_vector(front_face_normal);
                             let next_index = toi(
-                                ix + (normal.x.round() as i32),
-                                iy + (normal.y.round() as i32),
-                                iz + (normal.z.round() as i32),
+                                ix + ((normal.x + 0.5).floor() as i32),
+                                iy + ((normal.y + 0.5).floor() as i32),
+                                iz + ((normal.z + 0.5).floor() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             if *next_cell == Block::Air {
@@ -366,21 +374,21 @@ impl Chunk {
                                                         .transform_vector(*front_face_position)),
                                             );
                                             let uv = front_face_uv;
-                                            let side1_index = calc_index_for_ao(
+                                            let side1_index = self.calc_index_for_ao(
                                                 front_face_position,
                                                 vec3::<f32>(2.0, 0.0, 2.0),
                                                 matrix_for_direction,
                                                 &position,
                                             );
                                             let side1 = index_to_ao_not_air(side1_index);
-                                            let side2_index = calc_index_for_ao(
+                                            let side2_index = self.calc_index_for_ao(
                                                 front_face_position,
                                                 vec3::<f32>(0.0, 2.0, 2.0),
                                                 matrix_for_direction,
                                                 &position,
                                             );
                                             let side2 = index_to_ao_not_air(side2_index);
-                                            let corner_index = calc_index_for_ao(
+                                            let corner_index = self.calc_index_for_ao(
                                                 front_face_position,
                                                 vec3::<f32>(2.0, 2.0, 2.0),
                                                 matrix_for_direction,
