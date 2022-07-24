@@ -59,6 +59,8 @@ export default class App{
     const loadEXRTextureAsync=(baseDir:string,filename:string)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new EXRLoader().setPath(baseDir).load(filename,(texture)=>{
+          texture.encoding=THREE.sRGBEncoding;
+          texture.needsUpdate=true;
           resolve(texture);
         });
       });
@@ -66,6 +68,8 @@ export default class App{
     const loadTextureAsync=(baseDir:string,filename:string)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new THREE.TextureLoader().setPath(baseDir).load(filename,(texture)=>{
+          texture.encoding=THREE.sRGBEncoding;
+          texture.needsUpdate=true;
           resolve(texture);
         });
       });
