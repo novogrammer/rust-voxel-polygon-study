@@ -174,7 +174,11 @@ impl Chunk {
         }
         neighbor_chunk_index_list
     }
-    pub fn update(&mut self, time: f64) -> Vec<V3I> {
+    pub fn update(
+        &mut self,
+        terrain_updater: fn(global_position: &Vector3<f32>, time: f64) -> Block,
+        time: f64,
+    ) -> Vec<V3I> {
         let mut chunk_index_and_invalidate_list = vec![];
         for iz in -1..(1 + 1) {
             for iy in -1..(1 + 1) {
@@ -196,10 +200,7 @@ impl Chunk {
                     let position = self.calc_global_position_by_index(&block_index);
                     let position = position.to_cgmath::<f32>();
                     let cell = self.block_list.get_mut(i).unwrap();
-                    let mut next_cell = Block::Air;
-                    if position.magnitude() < (32.0 * (time.sin() * 0.5 + 0.5)) as f32 {
-                        next_cell = Block::Rock;
-                    }
+                    let next_cell = terrain_updater(&position, time);
                     if *cell != next_cell {
                         // needs_draw
                         *cell = next_cell;

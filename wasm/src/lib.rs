@@ -20,6 +20,7 @@ mod block;
 mod chunk;
 mod geometry;
 mod geometry_buffer;
+mod terrain_updater;
 mod universe;
 mod v2f;
 mod v3f;
