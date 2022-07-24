@@ -78,10 +78,10 @@ impl Universe {
         universe.chunk_list = chunk_list;
         universe
     }
-    pub fn update(&mut self) {
+    pub fn update(&mut self, time: f64) {
         let mut chunk_to_invalidate_list = vec![];
         for chunk in self.chunk_list.iter_mut() {
-            let mut v = chunk.update();
+            let mut v = chunk.update(time);
             chunk_to_invalidate_list.append(&mut v);
         }
         for chunk_to_invalidate in chunk_to_invalidate_list {
@@ -146,7 +146,7 @@ impl Universe {
                 }
             }
         }
-        console_log!("{}", block_buffer.len());
+        // console_log!("{}", block_buffer.len());
 
         block_buffer.clone()
     }

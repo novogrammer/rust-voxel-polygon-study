@@ -26,7 +26,7 @@ export default class App{
   }
   async setupVoxelAsync(){
     const universe=Universe.new();
-    universe.update();
+    universe.update(0.0);
     universe.draw();
 
     this.voxel={
@@ -232,7 +232,8 @@ export default class App{
       throw new Error("this.three is null");
     }
     const {renderer,scene,camera,bufferGeometryList}=this.three;
-
+    universe.update(time * 0.001);
+    universe.draw();
 
     const l=universe.get_chunk_list_length();
     for(let i=0;i<l;i++){

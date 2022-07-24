@@ -1,6 +1,3 @@
-use std::env::var;
-use std::mem::swap;
-
 use wasm_bindgen::prelude::*;
 
 //use cgmath::{vec3, Matrix4, SquareMatrix, Transform, Transform3, Vector3};
@@ -173,7 +170,7 @@ impl Chunk {
         }
         neighbor_chunk_index_list
     }
-    pub fn update(&mut self) -> Vec<V3I> {
+    pub fn update(&mut self, time: f64) -> Vec<V3I> {
         let mut chunk_to_invalidate_list = vec![];
         for iz in -1..(1 + 1) {
             for iy in -1..(1 + 1) {
@@ -196,7 +193,7 @@ impl Chunk {
                     let position = position.to_cgmath::<f32>();
                     let cell = self.block_list.get_mut(i).unwrap();
                     let mut next_cell = Block::Air;
-                    if position.magnitude() < CHUNK_RESOLUTION_WIDTH as f32 {
+                    if position.magnitude() < (32.0 * (time.sin() * 0.5 + 0.5)) as f32 {
                         next_cell = Block::Rock;
                     }
                     if *cell != next_cell {
