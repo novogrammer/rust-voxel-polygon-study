@@ -200,6 +200,11 @@ impl Universe {
         // 交互に存在する場合が最悪のパターン
         BLOCK_LIST_LENGTH as u32 / 2 * 6 * (3 * 2)
     }
+    pub fn get_initial_geometry_vertex_length(&self) -> u32 {
+        // 楽観的な数値として
+        BLOCK_LIST_LENGTH as u32
+        // 1 as u32
+    }
 }
 
 impl Universe {

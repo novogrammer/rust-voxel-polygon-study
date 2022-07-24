@@ -182,33 +182,35 @@ export default class App{
   
     
     const l=universe.get_chunk_list_length();
-    const maxGeometryVertexLength=universe.get_max_geometry_vertex_length();
+    // const maxGeometryVertexLength=universe.get_max_geometry_vertex_length();
+    const initialGeometryVertexLength=universe.get_initial_geometry_vertex_length();
     const bufferGeometryList=[];
     for(let i=0;i<l;i++){
       const bufferGeometry = new THREE.BufferGeometry();
+      bufferGeometry.userData.vertexLength=initialGeometryVertexLength;
       {
-        const positionList=new Float32Array(maxGeometryVertexLength*3);
+        const positionList=new Float32Array(initialGeometryVertexLength*3);
         const positionAttribute=new THREE.BufferAttribute(positionList,3);
         positionAttribute.setUsage(THREE.DynamicDrawUsage);
         bufferGeometry.setAttribute("position",positionAttribute);
         bufferGeometry.userData.positionList=positionList;
       }
       {
-        const normalList=new Float32Array(maxGeometryVertexLength*3);
+        const normalList=new Float32Array(initialGeometryVertexLength*3);
         const normalAttribute=new THREE.BufferAttribute(normalList,3);
         normalAttribute.setUsage(THREE.DynamicDrawUsage);
         bufferGeometry.setAttribute("normal",normalAttribute);
         bufferGeometry.userData.normalList=normalList;
       }
       {
-        const colorList=new Float32Array(maxGeometryVertexLength*3);
+        const colorList=new Float32Array(initialGeometryVertexLength*3);
         const colorAttribute=new THREE.BufferAttribute(colorList,3);
         colorAttribute.setUsage(THREE.DynamicDrawUsage);
         bufferGeometry.setAttribute("color",colorAttribute);
         bufferGeometry.userData.colorList=colorList;
       }
       {
-        const uvList=new Float32Array(maxGeometryVertexLength*2);
+        const uvList=new Float32Array(initialGeometryVertexLength*2);
         const uvAttribute=new THREE.BufferAttribute(uvList,2);
         uvAttribute.setUsage(THREE.DynamicDrawUsage);
         bufferGeometry.setAttribute("uv",uvAttribute);
