@@ -30,9 +30,9 @@ pub const CHUNK_RESOLUTION_DEPTH: usize = 32;
 // pub const CHUNK_RESOLUTION_WIDTH: usize = 16;
 // pub const CHUNK_RESOLUTION_HEIGHT: usize = 16;
 // pub const CHUNK_RESOLUTION_DEPTH: usize = 16;
-// pub const CHUNK_RESOLUTION_WIDTH: usize = 4;
-// pub const CHUNK_RESOLUTION_HEIGHT: usize = 4;
-// pub const CHUNK_RESOLUTION_DEPTH: usize = 4;
+// pub const CHUNK_RESOLUTION_WIDTH: usize = 8;
+// pub const CHUNK_RESOLUTION_HEIGHT: usize = 8;
+// pub const CHUNK_RESOLUTION_DEPTH: usize = 8;
 // pub const CHUNK_RESOLUTION_WIDTH: usize = 4;
 // pub const CHUNK_RESOLUTION_HEIGHT: usize = 4;
 // pub const CHUNK_RESOLUTION_DEPTH: usize = 4;
@@ -145,7 +145,7 @@ impl Chunk {
                 let y = block_index.get_y() + iny;
                 for inx in -1..(1 + 1) {
                     let x = block_index.get_x() + inx;
-                    let mut neighbor_chunk_index = self.chunk_index.clone();
+                    let mut neighbor_chunk_index = self.chunk_index;
                     if x < 0 {
                         neighbor_chunk_index.set_x(neighbor_chunk_index.get_x() - 1);
                     }
@@ -175,7 +175,7 @@ impl Chunk {
         for iz in -1..(1 + 1) {
             for iy in -1..(1 + 1) {
                 for ix in -1..(1 + 1) {
-                    let mut chunk_index = self.chunk_index.clone();
+                    let mut chunk_index = self.chunk_index;
                     chunk_index.set_x(chunk_index.get_x() + ix);
                     chunk_index.set_y(chunk_index.get_y() + iy);
                     chunk_index.set_z(chunk_index.get_z() + iz);
@@ -416,9 +416,8 @@ impl Chunk {
                                     &front_face_index_list_flipped
                                 };
                                 for front_face_index in face_index_list {
-                                    vertex_list.push(
-                                        *quad_vertex_list.get(*front_face_index).unwrap().clone(),
-                                    );
+                                    let vertex = **quad_vertex_list.get(*front_face_index).unwrap();
+                                    vertex_list.push(vertex);
                                 }
                             }
                         }
@@ -440,10 +439,10 @@ impl Chunk {
         let mut uv_list = vec![];
         uv_list.reserve(l);
         for vertex in &self.geometry.vertex_list {
-            position_list.push(vertex.position.clone());
-            normal_list.push(vertex.normal.clone());
-            color_list.push(vertex.color.clone());
-            uv_list.push(vertex.uv.clone());
+            position_list.push(vertex.position);
+            normal_list.push(vertex.normal);
+            color_list.push(vertex.color);
+            uv_list.push(vertex.uv);
         }
         self.geometry_buffer.position_list = position_list;
         self.geometry_buffer.normal_list = normal_list;

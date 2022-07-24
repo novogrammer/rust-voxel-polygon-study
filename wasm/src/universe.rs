@@ -103,7 +103,7 @@ impl Universe {
             for iy in -1..(CHUNK_RESOLUTION_HEIGHT as i32 + 1) {
                 for ix in -1..(CHUNK_RESOLUTION_WIDTH as i32 + 1) {
                     let mut block_index = V3I::new(ix, iy, iz);
-                    let mut chunk_index = chunk_index.clone();
+                    let mut chunk_index = *chunk_index;
 
                     if ix < 0 {
                         block_index.set_x(ix + (CHUNK_RESOLUTION_WIDTH as i32));
@@ -148,14 +148,14 @@ impl Universe {
         }
         // console_log!("{}", block_buffer.len());
 
-        block_buffer.clone()
+        block_buffer
     }
 
     pub fn draw(&mut self) {
         let chunk_index_list: Vec<V3I> = self
             .chunk_list
             .iter()
-            .map(|chunk: &Chunk| chunk.chunk_index.clone())
+            .map(|chunk: &Chunk| chunk.chunk_index)
             .collect();
         let block_buffer_list: Vec<Vec<Block>> = chunk_index_list
             .iter()
@@ -185,7 +185,7 @@ impl Universe {
         self.get_chunk(i).geometry_buffer.position_list.len()
     }
     pub fn get_chunk_origin(&self, i: usize) -> V3F {
-        self.get_chunk(i).origin.clone()
+        self.get_chunk(i).origin
     }
     pub fn get_geometry_version(&self, i: usize) -> u32 {
         self.get_chunk(i).version
