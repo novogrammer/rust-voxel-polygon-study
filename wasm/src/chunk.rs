@@ -171,7 +171,7 @@ impl Chunk {
         neighbor_chunk_index_list
     }
     pub fn update(&mut self, time: f64) -> Vec<V3I> {
-        let mut chunk_to_invalidate_list = vec![];
+        let mut chunk_index_and_invalidate_list = vec![];
         for iz in -1..(1 + 1) {
             for iy in -1..(1 + 1) {
                 for ix in -1..(1 + 1) {
@@ -179,7 +179,7 @@ impl Chunk {
                     chunk_index.set_x(chunk_index.get_x() + ix);
                     chunk_index.set_y(chunk_index.get_y() + iy);
                     chunk_index.set_z(chunk_index.get_z() + iz);
-                    chunk_to_invalidate_list.push((chunk_index, false))
+                    chunk_index_and_invalidate_list.push((chunk_index, false))
                 }
             }
         }
@@ -201,10 +201,12 @@ impl Chunk {
                         *cell = next_cell;
                         let block_index = V3I::new(ix, iy, iz);
                         let v = self.make_neighbor_chunk_index_list(&block_index);
-                        for chunk_to_invalidate in &mut chunk_to_invalidate_list {
+                        for (chunk_index_to_invalidate, is_invalidate) in
+                            &mut chunk_index_and_invalidate_list
+                        {
                             for chunk_index in &v {
-                                if chunk_to_invalidate.0 == *chunk_index {
-                                    chunk_to_invalidate.1 = true;
+                                if *chunk_index_to_invalidate == *chunk_index {
+                                    *is_invalidate = true;
                                 }
                             }
                         }
@@ -213,12 +215,12 @@ impl Chunk {
                 }
             }
         }
-        let chunk_to_invalidate_list: Vec<V3I> = chunk_to_invalidate_list
+        let chunk_index_to_invalidate_list: Vec<V3I> = chunk_index_and_invalidate_list
             .iter()
-            .filter(|ci_and_i| ci_and_i.1 == true)
-            .map(|ci_and_i| ci_and_i.0)
+            .filter(|(_ci, i)| *i == true)
+            .map(|(ci, _i)| *ci)
             .collect();
-        chunk_to_invalidate_list
+        chunk_index_to_invalidate_list
     }
     pub fn get_block_option_by_block_index(&self, block_index: &V3I) -> Option<&Block> {
         let x = block_index.get_x();
@@ -397,7 +399,7 @@ impl Chunk {
                                             )
                                         })
                                         .collect();
-                                let mut quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
+                                let quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
                                     .iter()
                                     .map(|(quad_vertex, _ao)| quad_vertex)
                                     .collect();
