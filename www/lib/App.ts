@@ -55,40 +55,117 @@ export default class App{
     spotLight.lookAt(0,0,0);
     scene.add(spotLight);
   
-    const baseDir="/textures/coast_sand_rocks_02_1k/";
 
-    const loadEXRTextureAsync=(filename:string)=>{
+    const loadEXRTextureAsync=(baseDir:string,filename:string)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new EXRLoader().setPath(baseDir).load(filename,(texture)=>{
           resolve(texture);
         });
       });
     };
-    const loadTextureAsync=(filename:string)=>{
+    const loadTextureAsync=(baseDir:string,filename:string)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new THREE.TextureLoader().setPath(baseDir).load(filename,(texture)=>{
           resolve(texture);
         });
       });
     };
+    // const material= await (async()=>{
+    //   const baseDir="/textures/coast_sand_rocks_02_1k/";
+    //   const diff=await loadTextureAsync(baseDir,"coast_sand_rocks_02_diff_1k.jpg");
+    //   // const disp=await loadTextureAsync(baseDir,"coast_sand_rocks_02_disp_1k.png");
+    //   const nor=await loadEXRTextureAsync(baseDir,"coast_sand_rocks_02_nor_gl_1k.exr");
+    //   const rough=await loadEXRTextureAsync(baseDir,"coast_sand_rocks_02_rough_1k.exr");
 
-    const diff=await loadTextureAsync("coast_sand_rocks_02_diff_1k.jpg");
-    // const disp=await loadTextureAsync("coast_sand_rocks_02_disp_1k.png");
-    const nor=await loadEXRTextureAsync("coast_sand_rocks_02_nor_gl_1k.exr");
-    const rough=await loadEXRTextureAsync("coast_sand_rocks_02_rough_1k.exr");
+    //   const material=new THREE.MeshStandardMaterial({
+    //     map:diff,
+    //     roughnessMap:rough,
+    //     metalness:0,
+    //     normalMap:nor,
+    //     // displacementMap:disp,
+    //     vertexColors:true,
+    //   });
+    //   return material;
+  
+    // })();
+
+    // const material=await(async()=>{
+    //   const baseDir="/textures/metal_plate_1k/";
+    //   const diff=await loadTextureAsync(baseDir,"metal_plate_diff_1k.jpg");
+    //   // const disp=await loadTextureAsync(baseDir,"metal_plate_disp_1k.png");
+    //   const nor=await loadEXRTextureAsync(baseDir,"metal_plate_nor_gl_1k.exr");
+    //   const rough=await loadTextureAsync(baseDir,"metal_plate_rough_1k.jpg");
+    
+    //   const material=new THREE.MeshStandardMaterial({
+    //     map:diff,
+    //     roughnessMap:rough,
+    //     metalness:0,
+    //     normalMap:nor,
+    //     // displacementMap:disp,
+    //     vertexColors:true,
+    //   });
+    //   return material;
+    // })();
+
+    // const material=await(async()=>{
+    //   const baseDir="/textures/rock_boulder_cracked_1k/";
+    //   const diff=await loadTextureAsync(baseDir,"rock_boulder_cracked_diff_1k.jpg");
+    //   // const disp=await loadTextureAsync(baseDir,"rock_boulder_cracked_disp_1k.png");
+    //   const nor=await loadEXRTextureAsync(baseDir,"rock_boulder_cracked_nor_gl_1k.exr");
+    //   const rough=await loadEXRTextureAsync(baseDir,"rock_boulder_cracked_rough_1k.exr");
+    
+    //   const material=new THREE.MeshStandardMaterial({
+    //     map:diff,
+    //     roughnessMap:rough,
+    //     metalness:0,
+    //     normalMap:nor,
+    //     // displacementMap:disp,
+    //     vertexColors:true,
+    //   });
+    //   return material;
+    // })();
+
+    // const material=await(async()=>{
+    //   const baseDir="/textures/stone_brick_wall_001_1k/";
+    //   const diff=await loadTextureAsync(baseDir,"stone_brick_wall_001_diff_1k.jpg");
+    //   // const disp=await loadTextureAsync(baseDir,"stone_brick_wall_001_disp_1k.png");
+    //   const nor=await loadEXRTextureAsync(baseDir,"stone_brick_wall_001_nor_gl_1k.exr");
+    //   const rough=await loadTextureAsync(baseDir,"stone_brick_wall_001_rough_1k.jpg");
+    
+    //   const material=new THREE.MeshStandardMaterial({
+    //     map:diff,
+    //     roughnessMap:rough,
+    //     metalness:0,
+    //     normalMap:nor,
+    //     // displacementMap:disp,
+    //     vertexColors:true,
+    //   });
+    //   return material;
+    // })();
+
+    const material=await(async()=>{
+      const baseDir="/textures/red_brick_03_1k/";
+      const diff=await loadTextureAsync(baseDir,"red_brick_03_diff_1k.jpg");
+      // const disp=await loadTextureAsync(baseDir,"red_brick_03_disp_1k.png");
+      const nor=await loadEXRTextureAsync(baseDir,"red_brick_03_nor_gl_1k.exr");
+      const rough=await loadTextureAsync(baseDir,"red_brick_03_rough_1k.jpg");
+    
+      const material=new THREE.MeshStandardMaterial({
+        map:diff,
+        roughnessMap:rough,
+        metalness:0,
+        normalMap:nor,
+        // displacementMap:disp,
+        vertexColors:true,
+      });
+      return material;
+    })();
+
 
     // const material=new THREE.MeshBasicMaterial({
     //   color:0xffffff,
     //   vertexColors:true,
     // });
-    const material=new THREE.MeshStandardMaterial({
-      map:diff,
-      roughnessMap:rough,
-      metalness:0,
-      normalMap:nor,
-      // displacementMap:disp,
-      vertexColors:true,
-    });
     // const material=new THREE.MeshNormalMaterial({
     //   color:0xffffff,
     //   vertexColors:true,
