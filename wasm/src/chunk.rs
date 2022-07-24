@@ -261,8 +261,8 @@ impl Chunk {
         let ppp = vec3::<f32>(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp];
         let mm = vec2::<f32>(0.0, 0.0);
-        let mp = vec2::<f32>(1.0, 0.0);
-        let pm = vec2::<f32>(0.0, 1.0);
+        let mp = vec2::<f32>(0.0, 1.0);
+        let pm = vec2::<f32>(1.0, 0.0);
         let pp = vec2::<f32>(1.0, 1.0);
         let front_face_uv_list = vec![mm, pm, mp, pp];
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
