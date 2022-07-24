@@ -42,3 +42,7 @@ opt-level = 3
 # rustflags = [
 #   "-C", "link-args=-z stack-size=1500000",
 # ]
+
+[package.metadata.wasm-pack.profile.release]
+# previously had just ['-O4']
+wasm-opt = ['-O4', '-g']
