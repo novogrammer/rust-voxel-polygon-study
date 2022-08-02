@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  wasm:
+    build: ./
+    container_name: rust-voxel-polygon-study-wasm
+    # restart: always
+    volumes:
+      - ./pkg:/work/wasm/pkg
+    tty: true

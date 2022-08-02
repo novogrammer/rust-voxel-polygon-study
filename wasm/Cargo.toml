@@ -45,5 +45,5 @@ opt-level = 3
 
 [package.metadata.wasm-pack.profile.release]
 # previously had just ['-O4']
-wasm-opt = ['-O4', '-g']
-# wasm-opt = ['-O2', '-g']
+# wasm-opt = ['-O4', '-g']
+wasm-opt = false
