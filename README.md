@@ -43,3 +43,21 @@ $ npm run build
 $ cd www
 $ npm run start
 ```
+
+## Dockerを使ったビルド
+
+### wasm
+
+wasmフォルダは事前にbuildしておく必要がある。
+```
+$ cd wasm
+$ docker compose build
+$ docker compose up
+```
+### www
+
+wasmディレクトリも使うのでプロジェクトルートでビルドする。
+```
+$ docker compose build
+$ docker compose up
+```
