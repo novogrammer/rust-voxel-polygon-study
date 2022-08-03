@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
-    - name: apt
+    - name: APT
       run: sudo apt-get install -yq curl libssl-dev pkg-config build-essential
     - name: install rustup
       run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -19,15 +19,17 @@ jobs:
       run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
     - name: install wasm-pack
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    - name: build wasm
+    - name: Build wasm
       run: wasm-pack build
       working-directory: ./wasm
     - name: Use Node.js 16.x
+      working-directory: ./www
       uses: actions/setup-node@v3
       with:
         node-version: 16.x
         cache: 'npm'
     - run: npm ci
       working-directory: ./www
-    - run: npm run build
+    - name: Build www
+      run: npm run build
       working-directory: ./www
