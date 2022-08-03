@@ -75,7 +75,7 @@ export default class App{
       });
     };
     // const material= await (async()=>{
-    //   const baseDir="/textures/coast_sand_rocks_02_1k/";
+    //   const baseDir="./textures/coast_sand_rocks_02_1k/";
     //   const diff=await loadTextureAsync(baseDir,"coast_sand_rocks_02_diff_1k.jpg");
     //   // const disp=await loadTextureAsync(baseDir,"coast_sand_rocks_02_disp_1k.png");
     //   const nor=await loadEXRTextureAsync(baseDir,"coast_sand_rocks_02_nor_gl_1k.exr");
@@ -94,7 +94,7 @@ export default class App{
     // })();
 
     // const material=await(async()=>{
-    //   const baseDir="/textures/metal_plate_1k/";
+    //   const baseDir="./textures/metal_plate_1k/";
     //   const diff=await loadTextureAsync(baseDir,"metal_plate_diff_1k.jpg");
     //   // const disp=await loadTextureAsync(baseDir,"metal_plate_disp_1k.png");
     //   const nor=await loadEXRTextureAsync(baseDir,"metal_plate_nor_gl_1k.exr");
@@ -112,7 +112,7 @@ export default class App{
     // })();
 
     // const material=await(async()=>{
-    //   const baseDir="/textures/rock_boulder_cracked_1k/";
+    //   const baseDir="./textures/rock_boulder_cracked_1k/";
     //   const diff=await loadTextureAsync(baseDir,"rock_boulder_cracked_diff_1k.jpg");
     //   // const disp=await loadTextureAsync(baseDir,"rock_boulder_cracked_disp_1k.png");
     //   const nor=await loadEXRTextureAsync(baseDir,"rock_boulder_cracked_nor_gl_1k.exr");
@@ -130,7 +130,7 @@ export default class App{
     // })();
 
     // const material=await(async()=>{
-    //   const baseDir="/textures/stone_brick_wall_001_1k/";
+    //   const baseDir="./textures/stone_brick_wall_001_1k/";
     //   const diff=await loadTextureAsync(baseDir,"stone_brick_wall_001_diff_1k.jpg");
     //   // const disp=await loadTextureAsync(baseDir,"stone_brick_wall_001_disp_1k.png");
     //   const nor=await loadEXRTextureAsync(baseDir,"stone_brick_wall_001_nor_gl_1k.exr");
@@ -148,7 +148,7 @@ export default class App{
     // })();
 
     const material=await(async()=>{
-      const baseDir="/textures/red_brick_03_1k/";
+      const baseDir="./textures/red_brick_03_1k/";
       const diff=await loadTextureAsync(baseDir,"red_brick_03_diff_1k.jpg");
       // const disp=await loadTextureAsync(baseDir,"red_brick_03_disp_1k.png");
       const nor=await loadEXRTextureAsync(baseDir,"red_brick_03_nor_gl_1k.exr");
