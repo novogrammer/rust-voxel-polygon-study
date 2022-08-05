@@ -1,8 +1,5 @@
 use wasm_bindgen::prelude::*;
 
-//use cgmath::{vec3, Matrix4, SquareMatrix, Transform, Transform3, Vector3};
-use cgmath::*;
-
 use crate::block::*;
 use crate::geometry::Geometry;
 use crate::geometry_buffer::GeometryBuffer;
@@ -196,7 +193,7 @@ impl Chunk {
     }
     pub fn update(
         &mut self,
-        terrain_updater: fn(global_position: &Vector3<f32>, time: f64) -> Block,
+        terrain_updater: fn(global_position: &glam::Vec3, time: f64) -> Block,
         time: f64,
     ) -> Vec<V3I> {
         let mut chunk_index_and_invalidate_list = vec![];
@@ -219,7 +216,7 @@ impl Chunk {
                 for ix in 0..(CHUNK_RESOLUTION_WIDTH as i32) {
                     let block_index = V3I::new(ix, iy, iz);
                     let position = self.calc_global_position_by_index(&block_index);
-                    let position = position.to_cgmath::<f32>();
+                    let position = position.to_glam();
                     let cell = self.block_list.get_mut(i).unwrap();
                     let next_cell = terrain_updater(&position, time);
                     if *cell != next_cell {
@@ -275,56 +272,49 @@ impl Chunk {
     }
     fn calc_index_for_ao(
         &mut self,
-        front_face_position: &Vector3<f32>,
-        multiplier: Vector3<f32>,
-        matrix_for_direction: &Matrix4<f32>,
-        position: &Vector3<f32>,
+        front_face_position: &glam::Vec3,
+        multiplier: glam::Vec3,
+        matrix_for_direction: &glam::Mat4,
+        position: &glam::Vec3,
     ) -> V3I {
-        self.calc_index_by_position(&V3F::from_cgmath(
-            &(position
-                + matrix_for_direction
-                    .transform_vector(front_face_position.mul_element_wise(multiplier))),
+        self.calc_index_by_position(&V3F::from_glam(
+            &(*position
+                + matrix_for_direction.transform_vector3(glam::vec3(
+                    front_face_position.x() * multiplier.x(),
+                    front_face_position.y() * multiplier.y(),
+                    front_face_position.z() * multiplier.z(),
+                ))),
         ))
     }
     fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
         let mut vertex_list: Vec<Vertex> = vec![];
 
-        // let mmm = vec3::<f32>(-0.5, -0.5, -0.5);
-        let mmp = vec3::<f32>(-0.5, -0.5, 0.5);
-        // let mpm = vec3::<f32>(-0.5, 0.5, -0.5);
-        let mpp = vec3::<f32>(-0.5, 0.5, 0.5);
-        // let pmm = vec3::<f32>(0.5, -0.5, -0.5);
-        let pmp = vec3::<f32>(0.5, -0.5, 0.5);
-        // let ppm = vec3::<f32>(0.5, 0.5, -0.5);
-        let ppp = vec3::<f32>(0.5, 0.5, 0.5);
+        // let mmm = glam::vec3(-0.5, -0.5, -0.5);
+        let mmp = glam::vec3(-0.5, -0.5, 0.5);
+        // let mpm = glam::vec3(-0.5, 0.5, -0.5);
+        let mpp = glam::vec3(-0.5, 0.5, 0.5);
+        // let pmm = glam::vec3(0.5, -0.5, -0.5);
+        let pmp = glam::vec3(0.5, -0.5, 0.5);
+        // let ppm = glam::vec3(0.5, 0.5, -0.5);
+        let ppp = glam::vec3(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp];
-        let mm = vec2::<f32>(0.0, 0.0);
-        let mp = vec2::<f32>(0.0, 1.0);
-        let pm = vec2::<f32>(1.0, 0.0);
-        let pp = vec2::<f32>(1.0, 1.0);
+        let mm = glam::vec2(0.0, 0.0);
+        let mp = glam::vec2(0.0, 1.0);
+        let pm = glam::vec2(1.0, 0.0);
+        let pp = glam::vec2(1.0, 1.0);
         let front_face_uv_list = vec![mm, pm, mp, pp];
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
-        let front_face_normal = vec3::<f32>(0.0, 0.0, 1.0);
-        // let color_pink = vec3::<f32>(1.0, 0.5, 0.5);
-        // let color_lime = vec3::<f32>(0.0, 1.0, 0.5);
-        // let color_white = vec3::<f32>(1.0, 1.0, 1.0);
-        // let front_face_color_list = vec![
-        //     color_white,
-        //     color_white,
-        //     color_white,
-        //     color_white,
-        //     color_white,
-        //     color_white,
-        // ];
+        let front_face_normal = glam::vec3(0.0, 0.0, 1.0);
 
+        let a = glam::Mat4::from_rotation_x(1.0);
         let matrix_for_direction_list = vec![
-            Matrix4::<f32>::identity(),
-            Matrix4::<f32>::from_angle_y(Deg(90.0)),
-            Matrix4::<f32>::from_angle_y(Deg(-90.0)),
-            Matrix4::<f32>::from_angle_y(Deg(180.0)),
-            Matrix4::<f32>::from_angle_x(Deg(90.0)),
-            Matrix4::<f32>::from_angle_x(Deg(-90.0)),
+            glam::Mat4::identity(),
+            glam::Mat4::from_rotation_y(90.0_f32.to_radians()),
+            glam::Mat4::from_rotation_y(-90.0_f32.to_radians()),
+            glam::Mat4::from_rotation_y(180.0_f32.to_radians()),
+            glam::Mat4::from_rotation_x(90.0_f32.to_radians()),
+            glam::Mat4::from_rotation_x(-90.0_f32.to_radians()),
         ];
 
         let toi = |ix: i32, iy: i32, iz: i32| {
@@ -372,16 +362,16 @@ impl Chunk {
                     // let cell = self.block_list.get(i as usize).unwrap();
                     let i = toi(ix, iy, iz);
                     let cell = block_buffer.get(i as usize).unwrap();
-                    let position = vec3::<f32>(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
+                    let position = glam::vec3(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
                     // for now
                     if *cell != Block::Air {
                         for matrix_for_direction in &matrix_for_direction_list {
-                            let normal = matrix_for_direction.transform_vector(front_face_normal);
+                            let normal = matrix_for_direction.transform_vector3(front_face_normal);
                             let next_index = toi(
-                                ix + ((normal.x + 0.5).floor() as i32),
-                                iy + ((normal.y + 0.5).floor() as i32),
-                                iz + ((normal.z + 0.5).floor() as i32),
+                                ix + ((normal.x() + 0.5).floor() as i32),
+                                iy + ((normal.y() + 0.5).floor() as i32),
+                                iz + ((normal.z() + 0.5).floor() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             if *next_cell == Block::Air {
@@ -390,29 +380,29 @@ impl Chunk {
                                         .iter()
                                         .zip(front_face_uv_list.iter())
                                         .map(|(front_face_position, front_face_uv)| {
-                                            let vertex_position = V3F::from_cgmath(
+                                            let vertex_position = V3F::from_glam(
                                                 &(position
                                                     + matrix_for_direction
-                                                        .transform_vector(*front_face_position)),
+                                                        .transform_vector3(*front_face_position)),
                                             );
                                             let uv = front_face_uv;
                                             let side1_index = self.calc_index_for_ao(
                                                 front_face_position,
-                                                vec3::<f32>(2.0, 0.0, 2.0),
+                                                glam::vec3(2.0, 0.0, 2.0),
                                                 matrix_for_direction,
                                                 &position,
                                             );
                                             let side1 = index_to_ao_not_air(side1_index);
                                             let side2_index = self.calc_index_for_ao(
                                                 front_face_position,
-                                                vec3::<f32>(0.0, 2.0, 2.0),
+                                                glam::vec3(0.0, 2.0, 2.0),
                                                 matrix_for_direction,
                                                 &position,
                                             );
                                             let side2 = index_to_ao_not_air(side2_index);
                                             let corner_index = self.calc_index_for_ao(
                                                 front_face_position,
-                                                vec3::<f32>(2.0, 2.0, 2.0),
+                                                glam::vec3(2.0, 2.0, 2.0),
                                                 matrix_for_direction,
                                                 &position,
                                             );
@@ -421,9 +411,9 @@ impl Chunk {
                                             (
                                                 Vertex {
                                                     position: vertex_position,
-                                                    normal: V3F::from_cgmath(&normal),
+                                                    normal: V3F::from_glam(&normal),
                                                     color: make_ao_color(ao),
-                                                    uv: V2F::from_cgmath(uv),
+                                                    uv: V2F::from_glam(uv),
                                                 },
                                                 ao,
                                             )

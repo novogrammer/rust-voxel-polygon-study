@@ -1,7 +1,3 @@
-use cgmath::{
-    num_traits::{FromPrimitive, ToPrimitive},
-    Vector3,
-};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -37,24 +33,18 @@ impl V3I {
 }
 
 impl V3I {
-    pub fn from_cgmath<T>(v: &Vector3<T>) -> V3I
-    where
-        T: ToPrimitive,
-    {
+    pub fn from_glam(v: &glam::Vec3) -> V3I {
         V3I {
-            x: v.x.to_i32().unwrap(),
-            y: v.y.to_i32().unwrap(),
-            z: v.z.to_i32().unwrap(),
+            x: v.x() as i32,
+            y: v.y() as i32,
+            z: v.z() as i32,
         }
     }
-    pub fn to_cgmath<T>(&self) -> Vector3<T>
-    where
-        T: FromPrimitive,
-    {
-        Vector3::<T>::new(
-            T::from_i32(self.x).unwrap(),
-            T::from_i32(self.y).unwrap(),
-            T::from_i32(self.z).unwrap(),
+    pub fn to_glam(&self) -> glam::Vec3 {
+        glam::vec3(
+            self.get_x() as f32,
+            self.get_y() as f32,
+            self.get_z() as f32,
         )
     }
 }

@@ -1,7 +1,3 @@
-use cgmath::{
-    num_traits::{FromPrimitive, ToPrimitive},
-    Vector2,
-};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -30,19 +26,10 @@ impl V2F {
 }
 
 impl V2F {
-    pub fn from_cgmath<T>(v: &Vector2<T>) -> V2F
-    where
-        T: ToPrimitive,
-    {
-        V2F {
-            x: v.x.to_f32().unwrap(),
-            y: v.y.to_f32().unwrap(),
-        }
+    pub fn from_glam(v: &glam::Vec2) -> V2F {
+        V2F { x: v.x(), y: v.y() }
     }
-    pub fn to_cgmath<T>(&self) -> Vector2<T>
-    where
-        T: FromPrimitive,
-    {
-        Vector2::<T>::new(T::from_f32(self.x).unwrap(), T::from_f32(self.y).unwrap())
+    pub fn to_glam(&self) -> glam::Vec2 {
+        glam::vec2(self.get_x(), self.get_y())
     }
 }
