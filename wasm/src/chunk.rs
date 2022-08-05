@@ -100,43 +100,63 @@ impl Chunk {
         }
     }
     pub fn calc_index_by_position(&self, position: &V3F) -> V3I {
-        let p = position.to_cgmath();
-        let block_index = p - vec3::<f32>(0.5, 0.5, 0.5);
+        // let p = position.to_cgmath();
+        // let block_index = p - vec3::<f32>(0.5, 0.5, 0.5);
+        // V3I::new(
+        //     (block_index.x + 0.5).floor() as i32,
+        //     (block_index.y + 0.5).floor() as i32,
+        //     (block_index.z + 0.5).floor() as i32,
+        // )
         V3I::new(
-            (block_index.x + 0.5).floor() as i32,
-            (block_index.y + 0.5).floor() as i32,
-            (block_index.z + 0.5).floor() as i32,
+            (position.get_x()).floor() as i32,
+            (position.get_y()).floor() as i32,
+            (position.get_z()).floor() as i32,
         )
     }
 
     pub fn calc_index_by_global_position(&self, position: &V3F) -> V3I {
-        let o = self.origin.to_cgmath();
-        let p = position.to_cgmath();
-        let block_index = p - vec3::<f32>(0.5, 0.5, 0.5) - o;
+        // let o = self.origin.to_cgmath();
+        // let p = position.to_cgmath();
+        // let block_index = p - vec3::<f32>(0.5, 0.5, 0.5) - o;
+        // V3I::new(
+        //     (block_index.x + 0.5).floor() as i32,
+        //     (block_index.y + 0.5).floor() as i32,
+        //     (block_index.z + 0.5).floor() as i32,
+        // )
         V3I::new(
-            (block_index.x + 0.5).floor() as i32,
-            (block_index.y + 0.5).floor() as i32,
-            (block_index.z + 0.5).floor() as i32,
+            (position.get_x() - self.origin.get_x()).floor() as i32,
+            (position.get_y() - self.origin.get_y()).floor() as i32,
+            (position.get_z() - self.origin.get_z()).floor() as i32,
         )
     }
     pub fn calc_position_by_index(&self, block_index: &V3I) -> V3F {
-        let p = vec3(
-            block_index.get_x() as f32,
-            block_index.get_y() as f32,
-            block_index.get_z() as f32,
-        );
-        let position = p + vec3::<f32>(0.5, 0.5, 0.5);
-        V3F::from_cgmath(&position)
+        // let p = vec3(
+        //     block_index.get_x() as f32,
+        //     block_index.get_y() as f32,
+        //     block_index.get_z() as f32,
+        // );
+        // let position = p + vec3::<f32>(0.5, 0.5, 0.5);
+        // V3F::from_cgmath(&position)
+        V3F::new(
+            block_index.get_x() as f32 + 0.5,
+            block_index.get_y() as f32 + 0.5,
+            block_index.get_z() as f32 + 0.5,
+        )
     }
     pub fn calc_global_position_by_index(&self, block_index: &V3I) -> V3F {
-        let o = self.origin.to_cgmath();
-        let p = vec3(
-            block_index.get_x() as f32,
-            block_index.get_y() as f32,
-            block_index.get_z() as f32,
-        );
-        let position = p + o + vec3::<f32>(0.5, 0.5, 0.5);
-        V3F::from_cgmath(&position)
+        // let o = self.origin.to_cgmath();
+        // let p = vec3(
+        //     block_index.get_x() as f32,
+        //     block_index.get_y() as f32,
+        //     block_index.get_z() as f32,
+        // );
+        // let position = p + o + vec3::<f32>(0.5, 0.5, 0.5);
+        // V3F::from_cgmath(&position)
+        V3F::new(
+            block_index.get_x() as f32 + self.origin.get_x() + 0.5,
+            block_index.get_y() as f32 + self.origin.get_y() + 0.5,
+            block_index.get_z() as f32 + self.origin.get_z() + 0.5,
+        )
     }
 
     pub fn make_neighbor_chunk_index_list(&mut self, block_index: &V3I) -> Vec<V3I> {
@@ -180,6 +200,7 @@ impl Chunk {
         time: f64,
     ) -> Vec<V3I> {
         let mut chunk_index_and_invalidate_list = vec![];
+        chunk_index_and_invalidate_list.reserve(3 * 3 * 3);
         for iz in -1..(1 + 1) {
             for iy in -1..(1 + 1) {
                 for ix in -1..(1 + 1) {
