@@ -14,18 +14,18 @@ const texture_params_list=[
     name:"diff",
     ext:"jpg",
   },
-  // {
-  //   name:"disp",
-  //   ext:"png",
-  // },
+  {
+    name:"disp",
+    ext:"png",
+  },
   {
     name:"nor_gl",
     ext:"exr",
   },
-  // {
-  //   name:"rough",
-  //   ext:"exr",
-  // },
+  {
+    name:"rough",
+    ext:"exr",
+  },
 ];
 
 
@@ -37,7 +37,9 @@ for (let texture_params of texture_params_list){
       option_for_ext="-compress dwaa";
       break;
   }
-  const result = execSync(`montage -tile 4x4 -geometry 1024x1024 ${files.join(" ")} ${option_for_ext} dist/${texture_params.name}.${texture_params.ext}`);
+  // const geometry="1024x1024";
+  const geometry="512x512";
+  const result = execSync(`montage -tile 4x4 -geometry ${geometry} ${files.join(" ")} ${option_for_ext} dist/packed_${texture_params.name}.${texture_params.ext}`);
   console.log(result.toString());
 }
 
