@@ -302,9 +302,18 @@ impl Chunk {
         let mp = glam::vec2(0.0, 1.0);
         let pm = glam::vec2(1.0, 0.0);
         let pp = glam::vec2(1.0, 1.0);
-        let brick_front_face_uv_list: Vec<glam::Vec2> = vec![mm, pm, mp, pp]
+        let base_uv_list = vec![mm, pm, mp, pp];
+        let each_image_size = 512.0;
+        let remap_uv = |uv: &glam::Vec2| {
+            let one = 1.0 / each_image_size;
+            let result = *uv * (1.0 - one) + glam::vec2(one * 0.5, one * 0.5);
+            result
+        };
+
+        let brick_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
-            .map(|uv| *uv * 0.25 + glam::vec2(0.5, 0.75))
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.5, 0.75))
             .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
