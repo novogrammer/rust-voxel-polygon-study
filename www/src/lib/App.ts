@@ -49,7 +49,7 @@ export default class App{
   
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-    const spotLight = new THREE.SpotLight(0xffffff, 1.2,1000,THREE.MathUtils.degToRad(30));
+    const spotLight = new THREE.SpotLight(0xffffff, 1.2,1000,THREE.MathUtils.degToRad(45));
   
     spotLight.position.set(50, 50, 50);
     spotLight.lookAt(0,0,0);
