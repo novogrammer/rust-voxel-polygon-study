@@ -88,8 +88,13 @@ impl Universe {
     }
     pub fn update(&mut self, time: f64) {
         let mut chunk_to_invalidate_list = vec![];
+
+        let my_terrain_updater = |global_position: &glam::Vec3, time: f64| -> Block {
+            terrain_updater_a(global_position, time)
+        };
+
         for chunk in self.chunk_list.iter_mut() {
-            let mut v = chunk.update(terrain_updater_a, time);
+            let mut v = chunk.update(my_terrain_updater, time);
             chunk_to_invalidate_list.append(&mut v);
         }
         for chunk_to_invalidate in chunk_to_invalidate_list {

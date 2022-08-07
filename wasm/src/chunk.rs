@@ -191,11 +191,10 @@ impl Chunk {
         }
         neighbor_chunk_index_list
     }
-    pub fn update(
-        &mut self,
-        terrain_updater: fn(global_position: &glam::Vec3, time: f64) -> Block,
-        time: f64,
-    ) -> Vec<V3I> {
+    pub fn update<T>(&mut self, terrain_updater: T, time: f64) -> Vec<V3I>
+    where
+        T: Fn(&glam::Vec3, f64) -> Block,
+    {
         let mut chunk_index_and_invalidate_list = vec![];
         chunk_index_and_invalidate_list.reserve(3 * 3 * 3);
         for iz in -1..(1 + 1) {
