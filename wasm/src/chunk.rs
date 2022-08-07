@@ -302,12 +302,14 @@ impl Chunk {
         let mp = glam::vec2(0.0, 1.0);
         let pm = glam::vec2(1.0, 0.0);
         let pp = glam::vec2(1.0, 1.0);
-        let front_face_uv_list = vec![mm, pm, mp, pp];
+        let brick_front_face_uv_list: Vec<glam::Vec2> = vec![mm, pm, mp, pp]
+            .iter()
+            .map(|uv| *uv * 0.25 + glam::vec2(0.5, 0.75))
+            .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
         let front_face_normal = glam::vec3(0.0, 0.0, 1.0);
 
-        let a = glam::Mat4::from_rotation_x(1.0);
         let matrix_for_direction_list = vec![
             glam::Mat4::identity(),
             glam::Mat4::from_rotation_y(90.0_f32.to_radians()),
@@ -374,6 +376,7 @@ impl Chunk {
                                 iz + ((normal.z() + 0.5).floor() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
+                            let front_face_uv_list = &brick_front_face_uv_list;
                             if *next_cell == Block::Air {
                                 let quad_vertex_and_ao_list: Vec<(Vertex, i32)> =
                                     front_face_position_list
