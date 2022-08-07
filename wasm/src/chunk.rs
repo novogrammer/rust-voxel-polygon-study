@@ -310,10 +310,30 @@ impl Chunk {
             result
         };
 
+        let rock_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.5))
+            .collect();
         let brick_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
             .map(remap_uv)
             .map(|uv| uv * 0.25 + glam::vec2(0.5, 0.75))
+            .collect();
+        let tile_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.75, 0.75))
+            .collect();
+        let sand_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.75))
+            .collect();
+        let metal_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.75))
             .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
@@ -385,7 +405,13 @@ impl Chunk {
                                 iz + ((normal.z() + 0.5).floor() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
-                            let front_face_uv_list = &brick_front_face_uv_list;
+                            let front_face_uv_list = match *cell {
+                                Block::Brick => &brick_front_face_uv_list,
+                                Block::Tile => &tile_front_face_uv_list,
+                                Block::Sand => &sand_front_face_uv_list,
+                                Block::Metal => &metal_front_face_uv_list,
+                                _ => &rock_front_face_uv_list,
+                            };
                             if *next_cell == Block::Air {
                                 let quad_vertex_and_ao_list: Vec<(Vertex, i32)> =
                                     front_face_position_list

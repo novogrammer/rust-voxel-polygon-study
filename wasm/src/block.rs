@@ -10,4 +10,8 @@ pub const BLOCK_SIZE_DEPTH: f32 = 1.0;
 pub enum Block {
     Air = 0,
     Rock = 1,
+    Brick = 2,
+    Tile = 3,
+    Sand = 4,
+    Metal = 5,
 }
