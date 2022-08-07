@@ -74,11 +74,12 @@ export default class App{
         });
       });
     };
-    const setupTextureFilter=(t:THREE.Texture)=>{
+    const setupTexture=(t:THREE.Texture)=>{
       t.minFilter= THREE.NearestFilter;
       t.magFilter= THREE.NearestFilter;
       // t.minFilter= THREE.LinearFilter;
       // t.magFilter= THREE.LinearFilter;
+      t.generateMipmaps=true;
       t.needsUpdate=true;
     };
 
@@ -180,7 +181,7 @@ export default class App{
       const nor=await loadEXRTextureAsync(baseDir,"packed_nor_gl.exr");
       const rough=await loadEXRTextureAsync(baseDir,"packed_rough.exr");
 
-      [diff,nor,rough].forEach(setupTextureFilter);
+      [diff,nor,rough].forEach(setupTexture);
     
       const material=new THREE.MeshStandardMaterial({
         map:diff,
