@@ -74,6 +74,14 @@ export default class App{
         });
       });
     };
+    const setupTextureFilter=(t:THREE.Texture)=>{
+      t.minFilter= THREE.NearestFilter;
+      t.magFilter= THREE.NearestFilter;
+      // t.minFilter= THREE.LinearFilter;
+      // t.magFilter= THREE.LinearFilter;
+      t.needsUpdate=true;
+    };
+
     // const material= await (async()=>{
     //   const baseDir="./textures/coast_sand_rocks_02_1k/";
     //   const diff=await loadTextureAsync(baseDir,"coast_sand_rocks_02_diff_1k.jpg");
@@ -171,6 +179,8 @@ export default class App{
       // const disp=await loadTextureAsync(baseDir,"packed_disp.png");
       const nor=await loadEXRTextureAsync(baseDir,"packed_nor_gl.exr");
       const rough=await loadEXRTextureAsync(baseDir,"packed_rough.exr");
+
+      [diff,nor,rough].forEach(setupTextureFilter);
     
       const material=new THREE.MeshStandardMaterial({
         map:diff,
