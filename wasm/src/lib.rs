@@ -18,7 +18,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 mod block;
 mod chunk;
-mod geometry;
 mod geometry_buffer;
 mod terrain_updater;
 mod universe;

@@ -1,7 +1,6 @@
 use wasm_bindgen::prelude::*;
 
 use crate::block::*;
-use crate::geometry::Geometry;
 use crate::geometry_buffer::GeometryBuffer;
 use crate::v2f::V2F;
 use crate::v3f::V3F;
@@ -74,9 +73,6 @@ impl Chunk {
 
         block_list.resize(BLOCK_LIST_LENGTH, Block::Air);
 
-        // let geometry = Geometry {
-        //     vertex_list: vec![],
-        // };
         let geometry_buffer = GeometryBuffer {
             position_list: vec![],
             normal_list: vec![],
@@ -90,7 +86,6 @@ impl Chunk {
             // size,
             // block_resolution,
             block_list,
-            // geometry,
             geometry_buffer,
             needs_draw: true,
             version: 0,
