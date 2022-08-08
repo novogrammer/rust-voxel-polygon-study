@@ -264,22 +264,6 @@ impl Chunk {
             + x;
         return self.block_list.get(i as usize);
     }
-    fn calc_index_for_ao(
-        &mut self,
-        front_face_position: &glam::Vec3,
-        multiplier: glam::Vec3,
-        matrix_for_direction: &glam::Mat4,
-        position: &glam::Vec3,
-    ) -> V3I {
-        self.calc_index_by_position(&V3F::from_glam(
-            &(*position
-                + matrix_for_direction.transform_vector3(glam::vec3(
-                    front_face_position.x() * multiplier.x(),
-                    front_face_position.y() * multiplier.y(),
-                    front_face_position.z() * multiplier.z(),
-                ))),
-        ))
-    }
     pub fn draw(&mut self, block_buffer: &Vec<Block>) {
         if !self.needs_draw {
             return;
