@@ -150,9 +150,6 @@ impl Universe {
                         if let Some(result_cell) = block_option {
                             cell = *result_cell;
                             // console_log!("cell!");
-                            if cell == Block::Rock {
-                                // console_log!("rock!");
-                            }
                         }
                     }
                     block_buffer.push(cell);
