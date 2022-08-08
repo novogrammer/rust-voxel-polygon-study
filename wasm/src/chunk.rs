@@ -408,9 +408,9 @@ impl Chunk {
                         for matrix_for_direction in &matrix_for_direction_list {
                             let normal = matrix_for_direction.transform_vector3(front_face_normal);
                             let next_index = toi(
-                                ix + ((normal.x() + 0.5).floor() as i32),
-                                iy + ((normal.y() + 0.5).floor() as i32),
-                                iz + ((normal.z() + 0.5).floor() as i32),
+                                ix + (normal.x() as i32),
+                                iy + (normal.y() as i32),
+                                iz + (normal.z() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             let front_face_uv_list = match *cell {
