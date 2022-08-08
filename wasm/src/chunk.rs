@@ -285,7 +285,7 @@ impl Chunk {
             return;
         }
         // 楽観的な数値として
-        let l = BLOCK_LIST_LENGTH;
+        let l = BLOCK_LIST_LENGTH * 2;
         let mut position_list = vec![];
         position_list.reserve(l);
         let mut normal_list = vec![];
