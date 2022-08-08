@@ -48,7 +48,7 @@ pub struct Chunk {
     pub origin: V3F,
     pub chunk_index: V3I,
     pub block_list: Vec<Block>,
-    pub geometry: Geometry,
+    // pub geometry: Geometry,
     pub geometry_buffer: GeometryBuffer,
     pub needs_draw: bool,
     pub version: u32,
@@ -74,9 +74,9 @@ impl Chunk {
 
         block_list.resize(BLOCK_LIST_LENGTH, Block::Air);
 
-        let geometry = Geometry {
-            vertex_list: vec![],
-        };
+        // let geometry = Geometry {
+        //     vertex_list: vec![],
+        // };
         let geometry_buffer = GeometryBuffer {
             position_list: vec![],
             normal_list: vec![],
@@ -90,7 +90,7 @@ impl Chunk {
             // size,
             // block_resolution,
             block_list,
-            geometry,
+            // geometry,
             geometry_buffer,
             needs_draw: true,
             version: 0,
@@ -285,8 +285,19 @@ impl Chunk {
                 ))),
         ))
     }
-    fn draw_geometry(&mut self, block_buffer: &Vec<Block>) {
-        let mut vertex_list: Vec<Vertex> = vec![];
+    pub fn draw(&mut self, block_buffer: &Vec<Block>) {
+        if !self.needs_draw {
+            return;
+        }
+        let l = 0 as usize;
+        let mut position_list = vec![];
+        position_list.reserve(l);
+        let mut normal_list = vec![];
+        normal_list.reserve(l);
+        let mut color_list = vec![];
+        color_list.reserve(l);
+        let mut uv_list = vec![];
+        uv_list.reserve(l);
 
         // let mmm = glam::vec3(-0.5, -0.5, -0.5);
         let mmp = glam::vec3(-0.5, -0.5, 0.5);
@@ -478,7 +489,11 @@ impl Chunk {
                                 };
                                 for front_face_index in face_index_list {
                                     let vertex = **quad_vertex_list.get(*front_face_index).unwrap();
-                                    vertex_list.push(vertex);
+
+                                    position_list.push(vertex.position);
+                                    normal_list.push(vertex.normal);
+                                    color_list.push(vertex.color);
+                                    uv_list.push(vertex.uv);
                                 }
                             }
                         }
@@ -486,25 +501,9 @@ impl Chunk {
                 }
             }
         }
-        // self.geometry.vertex_list = vertex_list;
-        std::mem::swap(&mut self.geometry.vertex_list, &mut vertex_list);
-    }
-    fn copy_to_geometry_buffer(&mut self) {
-        let l = self.geometry.vertex_list.len();
-        let mut position_list = vec![];
-        position_list.reserve(l);
-        let mut normal_list = vec![];
-        normal_list.reserve(l);
-        let mut color_list = vec![];
-        color_list.reserve(l);
-        let mut uv_list = vec![];
-        uv_list.reserve(l);
-        for vertex in &self.geometry.vertex_list {
-            position_list.push(vertex.position);
-            normal_list.push(vertex.normal);
-            color_list.push(vertex.color);
-            uv_list.push(vertex.uv);
-        }
+        // // self.geometry.vertex_list = vertex_list;
+        // std::mem::swap(&mut self.geometry.vertex_list, &mut vertex_list);
+
         // self.geometry_buffer.position_list = position_list;
         std::mem::swap(&mut self.geometry_buffer.position_list, &mut position_list);
         // self.geometry_buffer.normal_list = normal_list;
@@ -513,14 +512,8 @@ impl Chunk {
         std::mem::swap(&mut self.geometry_buffer.color_list, &mut color_list);
         // self.geometry_buffer.uv_list = uv_list;
         std::mem::swap(&mut self.geometry_buffer.uv_list, &mut uv_list);
-        self.version += 1;
-    }
-    pub fn draw(&mut self, block_buffer: &Vec<Block>) {
-        if !self.needs_draw {
-            return;
-        }
-        self.draw_geometry(block_buffer);
-        self.copy_to_geometry_buffer();
+
         self.needs_draw = false;
+        self.version += 1;
     }
 }
