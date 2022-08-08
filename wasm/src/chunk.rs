@@ -284,7 +284,8 @@ impl Chunk {
         if !self.needs_draw {
             return;
         }
-        let l = 0 as usize;
+        // 楽観的な数値として
+        let l = BLOCK_LIST_LENGTH;
         let mut position_list = vec![];
         position_list.reserve(l);
         let mut normal_list = vec![];
