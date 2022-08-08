@@ -486,8 +486,8 @@ impl Chunk {
                 }
             }
         }
-
-        self.geometry.vertex_list = vertex_list;
+        // self.geometry.vertex_list = vertex_list;
+        std::mem::swap(&mut self.geometry.vertex_list, &mut vertex_list);
     }
     fn copy_to_geometry_buffer(&mut self) {
         let l = self.geometry.vertex_list.len();
@@ -505,10 +505,14 @@ impl Chunk {
             color_list.push(vertex.color);
             uv_list.push(vertex.uv);
         }
-        self.geometry_buffer.position_list = position_list;
-        self.geometry_buffer.normal_list = normal_list;
-        self.geometry_buffer.color_list = color_list;
-        self.geometry_buffer.uv_list = uv_list;
+        // self.geometry_buffer.position_list = position_list;
+        std::mem::swap(&mut self.geometry_buffer.position_list, &mut position_list);
+        // self.geometry_buffer.normal_list = normal_list;
+        std::mem::swap(&mut self.geometry_buffer.normal_list, &mut normal_list);
+        // self.geometry_buffer.color_list = color_list;
+        std::mem::swap(&mut self.geometry_buffer.color_list, &mut color_list);
+        // self.geometry_buffer.uv_list = uv_list;
+        std::mem::swap(&mut self.geometry_buffer.uv_list, &mut uv_list);
         self.version += 1;
     }
     pub fn draw(&mut self, block_buffer: &Vec<Block>) {
