@@ -355,6 +355,69 @@ impl Chunk {
             glam::Mat4::from_rotation_x(90.0_f32.to_radians()),
             glam::Mat4::from_rotation_x(-90.0_f32.to_radians()),
         ];
+        struct MyVertex {
+            position: glam::Vec3,
+            side1: glam::Vec3,
+            side2: glam::Vec3,
+            corner: glam::Vec3,
+            rock_uv: glam::Vec2,
+            brick_uv: glam::Vec2,
+            tile_uv: glam::Vec2,
+            sand_uv: glam::Vec2,
+            metal_uv: glam::Vec2,
+        }
+        struct MyVertexListAndNormalAndMatrix {
+            my_vertex_list: Vec<MyVertex>,
+            normal: glam::Vec3,
+            matrix: glam::Mat4,
+        }
+
+        let my_vertex_base_list: Vec<MyVertex> = (0..4)
+            .map(|i| {
+                let position = *front_face_position_list.get(i).unwrap();
+                MyVertex {
+                    position: position,
+                    side1: glam::vec3(position.x() * 2.0, position.y() * 0.0, position.z() * 2.0),
+                    side2: glam::vec3(position.x() * 0.0, position.y() * 2.0, position.z() * 2.0),
+                    corner: glam::vec3(position.x() * 2.0, position.y() * 2.0, position.z() * 2.0),
+                    rock_uv: *rock_front_face_uv_list.get(i).unwrap(),
+                    brick_uv: *brick_front_face_uv_list.get(i).unwrap(),
+                    tile_uv: *tile_front_face_uv_list.get(i).unwrap(),
+                    sand_uv: *sand_front_face_uv_list.get(i).unwrap(),
+                    metal_uv: *metal_front_face_uv_list.get(i).unwrap(),
+                }
+            })
+            .collect();
+        let my_vertex_list_and_normal_and_matrix_list: Vec<MyVertexListAndNormalAndMatrix> =
+            matrix_for_direction_list
+                .iter()
+                .map(|matrix_for_direction| {
+                    let my_vertex_list: Vec<MyVertex> = my_vertex_base_list
+                        .iter()
+                        .map(|my_vertex_base| {
+                            let vertex_for_direction = MyVertex {
+                                position: matrix_for_direction
+                                    .transform_vector3(my_vertex_base.position),
+                                side1: matrix_for_direction.transform_vector3(my_vertex_base.side1),
+                                side2: matrix_for_direction.transform_vector3(my_vertex_base.side2),
+                                corner: matrix_for_direction
+                                    .transform_vector3(my_vertex_base.corner),
+                                rock_uv: my_vertex_base.rock_uv,
+                                brick_uv: my_vertex_base.brick_uv,
+                                tile_uv: my_vertex_base.tile_uv,
+                                sand_uv: my_vertex_base.sand_uv,
+                                metal_uv: my_vertex_base.metal_uv,
+                            };
+                            vertex_for_direction
+                        })
+                        .collect::<Vec<_>>();
+                    MyVertexListAndNormalAndMatrix {
+                        my_vertex_list,
+                        normal: matrix_for_direction.transform_vector3(front_face_normal),
+                        matrix: *matrix_for_direction,
+                    }
+                })
+                .collect::<Vec<_>>();
 
         let toi = |ix: i32, iy: i32, iz: i32| {
             (CHUNK_RESOLUTION_HEIGHT as i32 + 2) * (CHUNK_RESOLUTION_WIDTH as i32 + 2) * (iz + 1)
@@ -401,70 +464,62 @@ impl Chunk {
                     // let cell = self.block_list.get(i as usize).unwrap();
                     let i = toi(ix, iy, iz);
                     let cell = block_buffer.get(i as usize).unwrap();
-                    let position = glam::vec3(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
+                    let base_position =
+                        glam::vec3(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
-                    // for now
                     if *cell != Block::Air {
-                        for matrix_for_direction in &matrix_for_direction_list {
-                            let normal = matrix_for_direction.transform_vector3(front_face_normal);
+                        for my_vertex_list_and_normal_and_matrix in
+                            &my_vertex_list_and_normal_and_matrix_list
+                        {
+                            let normal = &my_vertex_list_and_normal_and_matrix.normal;
                             let next_index = toi(
                                 ix + (normal.x() as i32),
                                 iy + (normal.y() as i32),
                                 iz + (normal.z() as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
-                            let front_face_uv_list = match *cell {
-                                Block::Brick => &brick_front_face_uv_list,
-                                Block::Tile => &tile_front_face_uv_list,
-                                Block::Sand => &sand_front_face_uv_list,
-                                Block::Metal => &metal_front_face_uv_list,
-                                _ => &rock_front_face_uv_list,
-                            };
                             if *next_cell == Block::Air {
-                                let quad_vertex_and_ao_list: Vec<(Vertex, i32)> =
-                                    front_face_position_list
-                                        .iter()
-                                        .zip(front_face_uv_list.iter())
-                                        .map(|(front_face_position, front_face_uv)| {
-                                            let vertex_position = V3F::from_glam(
-                                                &(position
-                                                    + matrix_for_direction
-                                                        .transform_vector3(*front_face_position)),
-                                            );
-                                            let uv = front_face_uv;
-                                            let side1_index = self.calc_index_for_ao(
-                                                front_face_position,
-                                                glam::vec3(2.0, 0.0, 2.0),
-                                                matrix_for_direction,
-                                                &position,
-                                            );
-                                            let side1 = index_to_ao_not_air(side1_index);
-                                            let side2_index = self.calc_index_for_ao(
-                                                front_face_position,
-                                                glam::vec3(0.0, 2.0, 2.0),
-                                                matrix_for_direction,
-                                                &position,
-                                            );
-                                            let side2 = index_to_ao_not_air(side2_index);
-                                            let corner_index = self.calc_index_for_ao(
-                                                front_face_position,
-                                                glam::vec3(2.0, 2.0, 2.0),
-                                                matrix_for_direction,
-                                                &position,
-                                            );
-                                            let corner = index_to_ao_not_air(corner_index);
-                                            let ao = vertex_a_o(side1, side2, corner);
-                                            (
-                                                Vertex {
-                                                    position: vertex_position,
-                                                    normal: V3F::from_glam(&normal),
-                                                    color: make_ao_color(ao),
-                                                    uv: V2F::from_glam(uv),
-                                                },
-                                                ao,
-                                            )
-                                        })
-                                        .collect();
+                                let my_vertex_list =
+                                    &my_vertex_list_and_normal_and_matrix.my_vertex_list;
+                                let matrix = &my_vertex_list_and_normal_and_matrix.matrix;
+
+                                let quad_vertex_and_ao_list: Vec<(Vertex, i32)> = my_vertex_list
+                                    .iter()
+                                    .map(|my_vertex| {
+                                        let uv = match *cell {
+                                            Block::Brick => &my_vertex.brick_uv,
+                                            Block::Tile => &my_vertex.tile_uv,
+                                            Block::Sand => &my_vertex.sand_uv,
+                                            Block::Metal => &my_vertex.metal_uv,
+                                            _ => &my_vertex.rock_uv,
+                                        };
+                                        let side1_index = self.calc_index_by_position(
+                                            &V3F::from_glam(&(base_position + my_vertex.side1)),
+                                        );
+                                        let side1 = index_to_ao_not_air(side1_index);
+                                        let side2_index = self.calc_index_by_position(
+                                            &V3F::from_glam(&(base_position + my_vertex.side2)),
+                                        );
+                                        let side2 = index_to_ao_not_air(side2_index);
+                                        let corner_index = self.calc_index_by_position(
+                                            &V3F::from_glam(&(base_position + my_vertex.corner)),
+                                        );
+                                        let corner = index_to_ao_not_air(corner_index);
+                                        let ao = vertex_a_o(side1, side2, corner);
+
+                                        (
+                                            Vertex {
+                                                position: V3F::from_glam(
+                                                    &(base_position + my_vertex.position),
+                                                ),
+                                                normal: V3F::from_glam(&normal),
+                                                uv: V2F::from_glam(&uv),
+                                                color: make_ao_color(ao),
+                                            },
+                                            ao,
+                                        )
+                                    })
+                                    .collect::<Vec<_>>();
                                 let quad_vertex_list: Vec<&Vertex> = quad_vertex_and_ao_list
                                     .iter()
                                     .map(|(quad_vertex, _ao)| quad_vertex)
