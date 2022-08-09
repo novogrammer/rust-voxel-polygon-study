@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::block::*;
 use crate::geometry_buffer::GeometryBuffer;
+use crate::terrain_updater::UpdaterType;
 use crate::v2f::V2F;
 use crate::v3f::V3F;
 use crate::v3i::V3I;
@@ -186,10 +187,7 @@ impl Chunk {
         }
         neighbor_chunk_index_list
     }
-    pub fn update<T>(&mut self, terrain_updater: T, time: f64) -> Vec<V3I>
-    where
-        T: Fn(&glam::Vec3, f64) -> Block,
-    {
+    pub fn update(&mut self, terrain_updater: &Box<UpdaterType>, time: f64) -> Vec<V3I> {
         let mut chunk_index_and_invalidate_list = vec![];
         chunk_index_and_invalidate_list.reserve(3 * 3 * 3);
         for iz in -1..(1 + 1) {
@@ -212,7 +210,7 @@ impl Chunk {
                     let position = self.calc_global_position_by_index(&block_index);
                     let position = position.to_glam();
                     let cell = self.block_list.get_mut(i).unwrap();
-                    let next_cell = terrain_updater(&position, time);
+                    let next_cell = terrain_updater(&position);
                     if *cell != next_cell {
                         // needs_draw
                         *cell = next_cell;

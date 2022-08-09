@@ -1,5 +1,11 @@
 use crate::{
-    block::*, chunk::*, terrain_updater::terrain_updater_a, utils, v2f::V2F, v3f::V3F, v3i::V3I,
+    block::*,
+    chunk::*,
+    terrain_updater::{terrain_updater_a_maker, terrain_updater_b_maker, UpdaterType},
+    utils,
+    v2f::V2F,
+    v3f::V3F,
+    v3i::V3I,
 };
 use wasm_bindgen::prelude::*;
 
@@ -89,12 +95,14 @@ impl Universe {
     pub fn update(&mut self, time: f64) {
         let mut chunk_to_invalidate_list = vec![];
 
-        let my_terrain_updater = |global_position: &glam::Vec3, time: f64| -> Block {
-            terrain_updater_a(global_position, time)
-        };
-
+        // let my_terrain_updater = |global_position: &glam::Vec3, time: f64| -> Block {
+        //     // terrain_updater_a(global_position, time)
+        //     terrain_updater_b(global_position, time)
+        // };
+        // let my_terrain_updater: Box<UpdaterType> = terrain_updater_a_maker(time);
+        let my_terrain_updater: Box<UpdaterType> = terrain_updater_b_maker(time);
         for chunk in self.chunk_list.iter_mut() {
-            let mut v = chunk.update(my_terrain_updater, time);
+            let mut v = chunk.update(&my_terrain_updater, time);
             chunk_to_invalidate_list.append(&mut v);
         }
         for chunk_to_invalidate in chunk_to_invalidate_list {
