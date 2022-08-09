@@ -1,4 +1,4 @@
-use noise::{Cache, NoiseFn, OpenSimplex};
+use noise::{NoiseFn, OpenSimplex};
 
 use crate::block::Block;
 
@@ -55,11 +55,18 @@ pub fn terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
 // }
 
 pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
-    let open_simplex = OpenSimplex::new();
-    // let open_simplex = Cache::new(open_simplex);
+    let noise = OpenSimplex::default();
     let f = move |global_position: &glam::Vec3| -> Block {
         let mut next_cell = Block::Air;
-        let value = open_simplex.get([
+        // Airであることが確定している座標
+        if 10.0 < global_position.y() {
+            return Block::Air;
+        }
+        // Rockであることが確定している座標
+        if global_position.y() < -13.0 {
+            return Block::Rock;
+        }
+        let value = noise.get([
             global_position.x() as f64 * 0.1,
             global_position.z() as f64 * 0.1,
             time,
