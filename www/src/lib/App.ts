@@ -5,7 +5,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {EXRLoader} from "three/examples/jsm/loaders/EXRLoader.js";
 
 import { updateBufferGeometry } from "./rust_to_three";
-
+import Stats from "stats.js"
 
 
 export default class App{
@@ -21,8 +21,15 @@ export default class App{
     bufferGeometryList:THREE.BufferGeometry[],
     controls:OrbitControls,
   };
+  stats?:Stats;
   constructor(){
     this.setupPromise=this.setupAsync();
+  }
+  async setupStatsAsync(){
+    const stats=new Stats();
+    document.body.appendChild(stats.dom);
+    this.stats=stats;
+
   }
   async setupVoxelAsync(){
     const universe=Universe.new();
@@ -281,13 +288,20 @@ export default class App{
 
     renderer.setAnimationLoop( this.onRender.bind(this) );
 
+    window.addEventListener("resize",this.onResize.bind(this));
+
   }
   async setupAsync():Promise<void>{
+    await this.setupStatsAsync();
     await this.setupVoxelAsync();
     await this.setupThreeAsync();
     await this.setupEventsAsync();
   }
   onRender(time: DOMHighResTimeStamp, frame: XRFrame){
+    if(!this.stats){
+      throw new Error("this.stats is null");
+    }
+    this.stats.begin();
     if(!this.voxel){
       throw new Error("this.voxel is null");
     }
@@ -306,11 +320,20 @@ export default class App{
       updateBufferGeometry(universe,i,bufferGeometry);
       // console.log(bufferGeometry);
     }
-
-
     renderer.render(scene,camera);
+    this.stats.end();
+  }
+  onResize(event:UIEvent){
 
   }
+  async destroyStatsAsync(){
+    const {stats}=this;
+    if(stats){
+      document.body.removeChild(stats.dom);
+    }
+
+  }
+
 
   async destroyVoxelAsync():Promise<void>{
     if(!this.voxel){
@@ -334,5 +357,6 @@ export default class App{
     await this.destroyEventsAsync();
     await this.destroyThreeAsync();
     await this.destroyVoxelAsync();
+    await this.destroyStatsAsync();
   }
 }

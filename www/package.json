@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "devDependencies": {
+    "@types/stats": "^0.16.30",
     "@types/three": "^0.142.0",
     "copy-webpack-plugin": "^5.0.0",
     "ts-loader": "^8.1.0",
@@ -37,6 +38,7 @@
   },
   "dependencies": {
     "rust-voxel-polygon-study-wasm": "file:../wasm/pkg",
+    "stats.js": "^0.17.0",
     "three": "^0.142.0"
   }
 }
