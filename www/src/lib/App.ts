@@ -16,7 +16,7 @@ export default class App{
   three?:{
     renderer:THREE.WebGLRenderer,
     scene:THREE.Scene,
-    camera:THREE.Camera,
+    camera:THREE.PerspectiveCamera,
     material:THREE.Material,
     bufferGeometryList:THREE.BufferGeometry[],
     controls:OrbitControls,
@@ -324,7 +324,13 @@ export default class App{
     this.stats.end();
   }
   onResize(event:UIEvent){
+    if(this.three){
+      const {camera,renderer}=this.three;
+      renderer.setSize(window.innerWidth,window.innerHeight);
+      camera.aspect=window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
 
+    }
   }
   async destroyStatsAsync(){
     const {stats}=this;
