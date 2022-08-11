@@ -1,7 +1,7 @@
 use crate::{
     block::*,
     chunk::*,
-    terrain_updater::{terrain_updater_a_maker, terrain_updater_b_maker, UpdaterType},
+    terrain_updater::{terrain_updater_b_maker, UpdaterType},
     utils,
     v2f::V2F,
     v3f::V3F,
@@ -9,18 +9,18 @@ use crate::{
 };
 use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+// #[wasm_bindgen]
+// extern "C" {
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
 
-}
+// }
 
-macro_rules! console_log {
-  // Note that this is using the `log` function imported above during
-  // `bare_bones`
-  ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
+// macro_rules! console_log {
+//   // Note that this is using the `log` function imported above during
+//   // `bare_bones`
+//   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+// }
 
 // pub const UNIVERSE_RESOLUTION_WIDTH: usize = 8;
 // pub const UNIVERSE_RESOLUTION_HEIGHT: usize = 8;
@@ -43,7 +43,7 @@ pub const UNIVERSE_SIZE_DEPTH: f32 = CHUNK_SIZE_DEPTH * UNIVERSE_RESOLUTION_DEPT
 
 #[wasm_bindgen]
 pub struct Universe {
-    position: V3F,
+    origin: V3F,
     size: V3F,
     chunk_resolution: V3I,
     chunk_list: Vec<Chunk>,
@@ -54,7 +54,7 @@ impl Universe {
     pub fn new() -> Universe {
         utils::set_panic_hook();
 
-        let position = V3F::new(
+        let origin = V3F::new(
             UNIVERSE_SIZE_WIDTH * -0.5,
             UNIVERSE_SIZE_HEIGHT * -0.5,
             UNIVERSE_SIZE_DEPTH * -0.5,
@@ -70,7 +70,7 @@ impl Universe {
             UNIVERSE_RESOLUTION_DEPTH as i32,
         );
         let mut universe = Universe {
-            position,
+            origin,
             size,
             chunk_resolution,
             chunk_list: vec![],
@@ -102,7 +102,7 @@ impl Universe {
         // let my_terrain_updater: Box<UpdaterType> = terrain_updater_a_maker(time);
         let my_terrain_updater: Box<UpdaterType> = terrain_updater_b_maker(time);
         for chunk in self.chunk_list.iter_mut() {
-            let mut v = chunk.update(&my_terrain_updater, time);
+            let mut v = chunk.update(&my_terrain_updater);
             chunk_to_invalidate_list.append(&mut v);
         }
         for chunk_to_invalidate in chunk_to_invalidate_list {
@@ -216,6 +216,15 @@ impl Universe {
         // 楽観的な数値として
         BLOCK_LIST_LENGTH as u32
         // 1 as u32
+    }
+    pub fn get_origin(&self) -> V3F {
+        self.origin
+    }
+    pub fn get_size(&self) -> V3F {
+        self.size
+    }
+    pub fn get_chunk_resolution(&self) -> V3I {
+        self.chunk_resolution
     }
 }
 

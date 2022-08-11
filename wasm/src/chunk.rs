@@ -1,4 +1,4 @@
-use wasm_bindgen::prelude::*;
+// use wasm_bindgen::prelude::*;
 
 use crate::block::*;
 use crate::geometry_buffer::GeometryBuffer;
@@ -8,18 +8,18 @@ use crate::v3f::V3F;
 use crate::v3i::V3I;
 use crate::vertex::Vertex;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+// #[wasm_bindgen]
+// extern "C" {
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
 
-}
+// }
 
-macro_rules! console_log {
-  // Note that this is using the `log` function imported above during
-  // `bare_bones`
-  ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
+// macro_rules! console_log {
+//   // Note that this is using the `log` function imported above during
+//   // `bare_bones`
+//   ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+// }
 
 // pub const CHUNK_RESOLUTION_WIDTH: usize = 64;
 // pub const CHUNK_RESOLUTION_HEIGHT: usize = 64;
@@ -187,7 +187,7 @@ impl Chunk {
         }
         neighbor_chunk_index_list
     }
-    pub fn update(&mut self, terrain_updater: &Box<UpdaterType>, time: f64) -> Vec<V3I> {
+    pub fn update(&mut self, terrain_updater: &Box<UpdaterType>) -> Vec<V3I> {
         let mut chunk_index_and_invalidate_list = vec![];
         chunk_index_and_invalidate_list.reserve(3 * 3 * 3);
         for iz in -1..(1 + 1) {
@@ -351,7 +351,7 @@ impl Chunk {
         struct MyVertexListAndNormalAndMatrix {
             my_vertex_list: Vec<MyVertex>,
             normal: glam::Vec3,
-            matrix: glam::Mat4,
+            // matrix: glam::Mat4,
         }
 
         let my_vertex_base_list: Vec<MyVertex> = (0..4)
@@ -396,7 +396,7 @@ impl Chunk {
                     MyVertexListAndNormalAndMatrix {
                         my_vertex_list,
                         normal: matrix_for_direction.transform_vector3(front_face_normal),
-                        matrix: *matrix_for_direction,
+                        // matrix: *matrix_for_direction,
                     }
                 })
                 .collect::<Vec<_>>();
@@ -463,7 +463,7 @@ impl Chunk {
                             if *next_cell == Block::Air {
                                 let my_vertex_list =
                                     &my_vertex_list_and_normal_and_matrix.my_vertex_list;
-                                let matrix = &my_vertex_list_and_normal_and_matrix.matrix;
+                                // let matrix = &my_vertex_list_and_normal_and_matrix.matrix;
 
                                 let quad_vertex_and_ao_list: Vec<(Vertex, i32)> = my_vertex_list
                                     .iter()
