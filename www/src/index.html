@@ -2,10 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
+    <title>RustとWebAssemblyの習作</title>
     <style>
       body{
         margin:0;
+      }
+      .loading-text{
+        position:fixed;
+        top:0;
+        left:0;
+        font-size:10vw;
       }
       .go-github{
         position:fixed;
@@ -21,9 +27,9 @@
     </style>
   </head>
   <body>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
     <canvas id="View"></canvas>
     <a class="go-github" href="https://github.com/novogrammer/rust-voxel-polygon-study">GitHub</a>
+    <div class="loading-text">Loading...</div>
     <script src="./bootstrap.js"></script>
   </body>
 </html>

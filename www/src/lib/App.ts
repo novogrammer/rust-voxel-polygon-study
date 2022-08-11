@@ -258,6 +258,10 @@ export default class App{
       console.log(bufferGeometry);
     }
   
+    const loadingTextElement=document.querySelector(".loading-text") as HTMLElement;
+    if(loadingTextElement){
+      loadingTextElement.style.display="none";
+    }
 
 
     this.three={
