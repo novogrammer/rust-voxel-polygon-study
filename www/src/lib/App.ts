@@ -254,6 +254,7 @@ export default class App{
 
       bufferGeometryList.push(bufferGeometry);
       const mesh=new THREE.Mesh(bufferGeometry,material);
+      mesh.frustumCulled=false;
       const origin=universe.get_chunk_origin(i);
       mesh.position.set(origin.get_x(),origin.get_y(),origin.get_z());
       scene.add(mesh);

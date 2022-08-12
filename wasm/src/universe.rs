@@ -212,6 +212,9 @@ impl Universe {
     pub fn get_chunk_origin(&self, i: usize) -> V3F {
         self.get_chunk(i).origin
     }
+    pub fn get_chunk_size(&self, _i: usize) -> V3F {
+        V3F::new(CHUNK_SIZE_WIDTH, CHUNK_SIZE_HEIGHT, CHUNK_SIZE_DEPTH)
+    }
     pub fn get_geometry_version(&self, i: usize) -> u32 {
         self.get_chunk(i).version
     }
