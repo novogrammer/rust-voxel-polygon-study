@@ -1,7 +1,7 @@
 use crate::{
     block::*,
     chunk::*,
-    terrain_updater::{terrain_updater_b_maker, UpdaterType},
+    terrain_updater::{terrain_updater_b_maker, update_if, UpdaterType},
     utils,
     v2f::V2F,
     v3f::V3F,
@@ -100,7 +100,14 @@ impl Universe {
         //     terrain_updater_b(global_position, time)
         // };
         // let my_terrain_updater: Box<UpdaterType> = terrain_updater_a_maker(time);
-        let my_terrain_updater: Box<UpdaterType> = terrain_updater_b_maker(time);
+        let time_to_move = time;
+        let my_terrain_updater: Box<UpdaterType> = update_if(
+            Box::new(move |global_position: &glam::Vec3| {
+                return (time_to_move % 64.0) as f32 <= global_position.x() + 32.0
+                    && global_position.x() + 32.0 < ((time_to_move + 1.0) % 64.0) as f32;
+            }),
+            terrain_updater_b_maker(time),
+        );
         for chunk in self.chunk_list.iter_mut() {
             let mut v = chunk.update(&my_terrain_updater);
             chunk_to_invalidate_list.append(&mut v);

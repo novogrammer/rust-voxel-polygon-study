@@ -2,9 +2,10 @@ use noise::{NoiseFn, OpenSimplex};
 
 use crate::block::Block;
 
-pub type UpdaterType = dyn Fn(&glam::Vec3) -> Block;
+pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
+pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
 
-pub fn _terrain_updater_first(global_position: &glam::Vec3, time: f64) -> Block {
+pub fn _terrain_updater_first(global_position: &glam::Vec3, time: f64) -> Option<Block> {
     let mut next_cell = Block::Air;
     if global_position.length() < (32.0 * (time.sin() * 0.5 + 0.5)) as f32 {
         next_cell = Block::Sand;
@@ -14,11 +15,11 @@ pub fn _terrain_updater_first(global_position: &glam::Vec3, time: f64) -> Block 
     {
         next_cell = Block::Metal;
     }
-    next_cell
+    Some(next_cell)
 }
 
 pub fn _terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
-    let f = move |global_position: &glam::Vec3| -> Block {
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         let ground_level = (global_position.x() * 5.0 + time as f32 * 30.0)
             .to_radians()
@@ -31,7 +32,7 @@ pub fn _terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
         } else if global_position.y() < ground_level {
             next_cell = Block::Sand;
         }
-        next_cell
+        Some(next_cell)
     };
     Box::new(f)
 }
@@ -56,15 +57,15 @@ pub fn _terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
 
 pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
     let noise = OpenSimplex::default();
-    let f = move |global_position: &glam::Vec3| -> Block {
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         // Airであることが確定している座標
         if 10.0 < global_position.y() {
-            return Block::Air;
+            return Some(Block::Air);
         }
         // Rockであることが確定している座標
         if global_position.y() < -13.0 {
-            return Block::Rock;
+            return Some(Block::Rock);
         }
         let value = noise.get([
             global_position.x() as f64 * 0.1,
@@ -78,8 +79,19 @@ pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
         } else if global_position.y() < ground_level {
             next_cell = Block::Sand;
         }
-        next_cell
+        Some(next_cell)
     };
 
+    Box::new(f)
+}
+
+pub fn update_if(condition: Box<ConditionType>, updater: Box<UpdaterType>) -> Box<UpdaterType> {
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
+        if condition(global_position) {
+            updater(global_position)
+        } else {
+            None
+        }
+    };
     Box::new(f)
 }

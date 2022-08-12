@@ -210,18 +210,20 @@ impl Chunk {
                     let position = self.calc_global_position_by_index(&block_index);
                     let position = position.to_glam();
                     let cell = self.block_list.get_mut(i).unwrap();
-                    let next_cell = terrain_updater(&position);
-                    if *cell != next_cell {
-                        // needs_draw
-                        *cell = next_cell;
-                        let block_index = V3I::new(ix, iy, iz);
-                        let v = self.make_neighbor_chunk_index_list(&block_index);
-                        for (chunk_index_to_invalidate, is_invalidate) in
-                            &mut chunk_index_and_invalidate_list
-                        {
-                            for chunk_index in &v {
-                                if *chunk_index_to_invalidate == *chunk_index {
-                                    *is_invalidate = true;
+                    let next_cell_option = terrain_updater(&position);
+                    if let Some(next_cell) = next_cell_option {
+                        if *cell != next_cell {
+                            // needs_draw
+                            *cell = next_cell;
+                            let block_index = V3I::new(ix, iy, iz);
+                            let v = self.make_neighbor_chunk_index_list(&block_index);
+                            for (chunk_index_to_invalidate, is_invalidate) in
+                                &mut chunk_index_and_invalidate_list
+                            {
+                                for chunk_index in &v {
+                                    if *chunk_index_to_invalidate == *chunk_index {
+                                        *is_invalidate = true;
+                                    }
                                 }
                             }
                         }
