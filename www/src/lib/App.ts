@@ -185,8 +185,10 @@ export default class App{
       const baseDir="./textures/packed/";
       const diff=await loadTextureAsync(baseDir,"packed_diff.jpg");
       // const disp=await loadTextureAsync(baseDir,"packed_disp.png");
-      const nor=await loadEXRTextureAsync(baseDir,"packed_nor_gl.exr");
-      const rough=await loadEXRTextureAsync(baseDir,"packed_rough.exr");
+      // const nor=await loadEXRTextureAsync(baseDir,"packed_nor_gl.exr");
+      const nor=await loadTextureAsync(baseDir,"packed_nor_gl.png");
+      // const rough=await loadEXRTextureAsync(baseDir,"packed_rough.exr");
+      const rough=await loadTextureAsync(baseDir,"packed_rough.jpg");
 
       [diff,nor,rough].forEach(setupTexture);
     

@@ -20,11 +20,11 @@ const texture_params_list=[
   },
   {
     name:"nor_gl",
-    ext:"exr",
+    ext:"png",
   },
   {
     name:"rough",
-    ext:"exr",
+    ext:"jpg",
   },
 ];
 
