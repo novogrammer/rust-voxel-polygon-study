@@ -94,7 +94,11 @@ impl TerrainUpdater {
         self.previous_animation_time = animation_time;
         self.previous_scene_index = scene_index;
 
-        sequencial_update_maker(f_list)
+        if 0 < f_list.len() {
+            sequencial_update_maker(f_list)
+        } else {
+            Box::new(terrain_updater_none)
+        }
     }
 }
 
