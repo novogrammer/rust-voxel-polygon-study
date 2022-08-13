@@ -1,9 +1,45 @@
 use noise::{NoiseFn, OpenSimplex};
 
-use crate::block::Block;
+use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT};
 
 pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
 pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
+
+pub struct TerrainUpdater {
+    previous_masked_level: f32,
+}
+
+impl TerrainUpdater {
+    pub fn new() -> TerrainUpdater {
+        TerrainUpdater {
+            previous_masked_level: UNIVERSE_SIZE_HEIGHT * -0.5,
+        }
+    }
+    pub fn get_updater(&mut self, time: f64) -> Box<UpdaterType> {
+        let previous_masked_level = self.previous_masked_level;
+        let masked_level = (time as f32 * 30.0).to_radians().sin() * UNIVERSE_SIZE_HEIGHT as f32;
+
+        let f = if previous_masked_level < masked_level {
+            update_if(
+                Box::new(move |global_position: &glam::Vec3| {
+                    return previous_masked_level <= global_position.y()
+                        && global_position.y() < masked_level;
+                }),
+                terrain_updater_b_maker(time),
+            )
+        } else {
+            update_if(
+                Box::new(move |global_position: &glam::Vec3| {
+                    return masked_level <= global_position.y()
+                        && global_position.y() < previous_masked_level;
+                }),
+                Box::new(|_global_position: &glam::Vec3| Some(Block::Air)),
+            )
+        };
+        self.previous_masked_level = masked_level;
+        Box::new(f)
+    }
+}
 
 pub fn _terrain_updater_first(global_position: &glam::Vec3, time: f64) -> Option<Block> {
     let mut next_cell = Block::Air;

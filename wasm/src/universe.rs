@@ -1,11 +1,5 @@
 use crate::{
-    block::*,
-    chunk::*,
-    terrain_updater::{terrain_updater_b_maker, update_if, UpdaterType},
-    utils,
-    v2f::V2F,
-    v3f::V3F,
-    v3i::V3I,
+    block::*, chunk::*, terrain_updater::TerrainUpdater, utils, v2f::V2F, v3f::V3F, v3i::V3I,
 };
 use wasm_bindgen::prelude::*;
 
@@ -47,6 +41,7 @@ pub struct Universe {
     size: V3F,
     chunk_resolution: V3I,
     chunk_list: Vec<Chunk>,
+    terrain_updater: TerrainUpdater,
 }
 
 #[wasm_bindgen]
@@ -74,6 +69,7 @@ impl Universe {
             size,
             chunk_resolution,
             chunk_list: vec![],
+            terrain_updater: TerrainUpdater::new(),
         };
 
         let mut chunk_list = vec![];
@@ -100,14 +96,7 @@ impl Universe {
         //     terrain_updater_b(global_position, time)
         // };
         // let my_terrain_updater: Box<UpdaterType> = terrain_updater_a_maker(time);
-        let time_to_move = time;
-        let my_terrain_updater: Box<UpdaterType> = update_if(
-            Box::new(move |global_position: &glam::Vec3| {
-                return (time_to_move % 64.0) as f32 <= global_position.x() + 32.0
-                    && global_position.x() + 32.0 < ((time_to_move + 1.0) % 64.0) as f32;
-            }),
-            terrain_updater_b_maker(time),
-        );
+        let my_terrain_updater = self.terrain_updater.get_updater(time);
         for chunk in self.chunk_list.iter_mut() {
             let mut v = chunk.update(&my_terrain_updater);
             chunk_to_invalidate_list.append(&mut v);
