@@ -21,6 +21,7 @@ pub struct TerrainUpdater {
     previous_time: f64,
     previous_animation_time: f32,
     previous_scene_index: i32,
+    time_for_generate: f64,
 }
 
 impl TerrainUpdater {
@@ -29,6 +30,7 @@ impl TerrainUpdater {
             previous_time: 0.0,
             previous_animation_time: 0.0,
             previous_scene_index: 0,
+            time_for_generate: 0.0,
         }
     }
     pub fn get_updater(&mut self, time: f64) -> Box<UpdaterType> {
@@ -61,7 +63,7 @@ impl TerrainUpdater {
                     return previous_masked_level <= global_position.y()
                         && global_position.y() < masked_level;
                 }),
-                to_base_maker(scene_index, time),
+                to_base_maker(scene_index, self.time_for_generate),
             ));
         }
         if self.previous_animation_time < OUTRO_END_TIME || OUTRO_BEGIN_TIME <= animation_time {
@@ -80,6 +82,7 @@ impl TerrainUpdater {
         if OUTRO_END_TIME <= animation_time {
             scene_index = (scene_index + 1) % SCENE_QTY;
             animation_time = animation_time - SCENE_DURATION;
+            self.time_for_generate = time;
 
             let previous_masked_level = to_level((0.0 - INTRO_BEGIN_TIME) / INTRO_DURATION);
             let masked_level = to_level((animation_time - INTRO_BEGIN_TIME) / INTRO_DURATION);
@@ -88,7 +91,7 @@ impl TerrainUpdater {
                     return previous_masked_level <= global_position.y()
                         && global_position.y() < masked_level;
                 }),
-                to_base_maker(scene_index, time),
+                to_base_maker(scene_index, self.time_for_generate),
             ));
         }
         self.previous_animation_time = animation_time;
