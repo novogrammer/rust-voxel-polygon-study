@@ -6,7 +6,7 @@ DEMO https://novogrammer.github.io/rust-voxel-polygon-study/
 ## git clone
 ```
 $ git clone git@github.com:novogrammer/rust-voxel-polygon-study.git
-``
+```
 
 ## setup
 
