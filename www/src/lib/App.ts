@@ -22,12 +22,15 @@ export default class App{
     controls:OrbitControls,
   };
   stats?:Stats;
+  isDebug:boolean;
   constructor(){
+    this.isDebug=true;
     this.setupPromise=this.setupAsync();
   }
   async setupStatsAsync(){
     const stats=new Stats();
     document.body.appendChild(stats.dom);
+    stats.dom.style.display=this.isDebug?"block":"none";
     this.stats=stats;
 
   }
@@ -298,6 +301,9 @@ export default class App{
 
     window.addEventListener("resize",this.onResize.bind(this));
 
+    window.addEventListener("keydown",this.onKeyDown.bind(this));
+    window.addEventListener("keyup",this.onKeyUp.bind(this));
+
   }
   async setupAsync():Promise<void>{
     await this.setupStatsAsync();
@@ -331,6 +337,29 @@ export default class App{
     }
     renderer.render(scene,camera);
     this.stats.end();
+  }
+  onKeyDown(event:KeyboardEvent){
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
+    if(!this.stats){
+      throw new Error("this.stats is null");
+    }
+    const {controls}=this.three;
+    const {stats}=this;
+    switch(event.key){
+      case "a":
+        console.log("a")
+        controls.autoRotate=!controls.autoRotate;
+      case "d":
+        this.isDebug=!this.isDebug;
+        stats.dom.style.display=this.isDebug?"block":"none";
+      break;
+    }
+  
+  }
+  onKeyUp(event:KeyboardEvent){
+
   }
   onResize(event:UIEvent){
     if(this.three){

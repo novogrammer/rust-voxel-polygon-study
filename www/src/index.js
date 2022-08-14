@@ -1,6 +1,6 @@
 
 import App from "./lib/App";
 
-const app=new App();
+window.app=new App();
 
 
