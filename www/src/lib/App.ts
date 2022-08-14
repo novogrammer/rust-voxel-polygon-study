@@ -54,6 +54,8 @@ export default class App{
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.position.z = 40;
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate=false;
+    controls.autoRotateSpeed=1.0;
   
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
@@ -315,7 +317,8 @@ export default class App{
     if(!this.three){
       throw new Error("this.three is null");
     }
-    const {renderer,scene,camera,bufferGeometryList}=this.three;
+    const {renderer,scene,camera,bufferGeometryList,controls}=this.three;
+    controls.update();
     universe.update(time * 0.001);
     universe.draw();
 
