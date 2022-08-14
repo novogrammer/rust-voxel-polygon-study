@@ -88,7 +88,7 @@ impl Universe {
         universe.chunk_list = chunk_list;
         universe
     }
-    pub fn update(&mut self, time: f64) {
+    pub fn update(&mut self, time: f64, camera_position: V3F) {
         let mut chunk_to_invalidate_list = vec![];
 
         // let my_terrain_updater = |global_position: &glam::Vec3, time: f64| -> Block {
@@ -96,7 +96,9 @@ impl Universe {
         //     terrain_updater_b(global_position, time)
         // };
         // let my_terrain_updater: Box<UpdaterType> = terrain_updater_a_maker(time);
-        let my_terrain_updater = self.terrain_updater.get_updater(time);
+        let my_terrain_updater = self
+            .terrain_updater
+            .get_updater(time, camera_position.to_glam());
         for chunk in self.chunk_list.iter_mut() {
             let mut v = chunk.update(&my_terrain_updater);
             chunk_to_invalidate_list.append(&mut v);

@@ -36,7 +36,7 @@ export default class App{
   }
   async setupVoxelAsync(){
     const universe=Universe.new();
-    universe.update(0.0);
+    universe.update(0.0,V3F.new(Infinity,Infinity,Infinity));
     universe.draw();
 
     this.voxel={
@@ -325,7 +325,7 @@ export default class App{
     }
     const {renderer,scene,camera,bufferGeometryList,controls}=this.three;
     controls.update();
-    universe.update(time * 0.001);
+    universe.update(time * 0.001,V3F.new(camera.position.x,camera.position.y,camera.position.z));
     universe.draw();
 
     const l=universe.get_chunk_list_length();

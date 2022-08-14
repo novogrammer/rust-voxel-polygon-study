@@ -1,6 +1,6 @@
 use noise::{NoiseFn, OpenSimplex};
 
-use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT};
+use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT, v3f::V3F};
 
 pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
 pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
@@ -16,6 +16,8 @@ const OUTRO_BEGIN_TIME: f32 = SCENE_DURATION - OUTRO_DURATION;
 const OUTRO_END_TIME: f32 = SCENE_DURATION;
 
 const DELTA_TIME_MAX: f32 = 1.0 / 60.0;
+
+const CAMERA_SPHERE_RADIUS: f32 = 2.0;
 
 pub struct TerrainUpdater {
     previous_time: f64,
@@ -33,7 +35,7 @@ impl TerrainUpdater {
             time_for_generate: 0.0,
         }
     }
-    pub fn get_updater(&mut self, time: f64) -> Box<UpdaterType> {
+    pub fn get_updater(&mut self, time: f64, camera_position: glam::Vec3) -> Box<UpdaterType> {
         let delta_time = ((time - self.previous_time) as f32).min(DELTA_TIME_MAX);
 
         let mut animation_time = self.previous_animation_time + delta_time;
@@ -94,6 +96,15 @@ impl TerrainUpdater {
                 to_base_maker(scene_index, self.time_for_generate),
             ));
         }
+        f_list.push(Box::new(move |global_position: &glam::Vec3| {
+            let distance_squared = (*global_position - camera_position).length_squared();
+
+            if distance_squared <= CAMERA_SPHERE_RADIUS * CAMERA_SPHERE_RADIUS {
+                Some(Block::Air)
+            } else {
+                None
+            }
+        }));
         self.previous_animation_time = animation_time;
         self.previous_scene_index = scene_index;
 
