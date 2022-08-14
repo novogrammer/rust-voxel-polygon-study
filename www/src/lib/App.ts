@@ -351,10 +351,11 @@ export default class App{
       case "a":
         console.log("a")
         controls.autoRotate=!controls.autoRotate;
+        break;
       case "d":
         this.isDebug=!this.isDebug;
         stats.dom.style.display=this.isDebug?"block":"none";
-      break;
+        break;
     }
   
   }
