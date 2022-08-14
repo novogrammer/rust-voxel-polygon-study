@@ -108,62 +108,6 @@ impl Universe {
             }
         }
     }
-    fn make_block_buffer(&mut self, chunk_index: &V3I) -> Vec<Block> {
-        let mut block_buffer = vec![];
-        block_buffer.reserve(
-            (CHUNK_RESOLUTION_DEPTH + 2)
-                * (CHUNK_RESOLUTION_HEIGHT + 2)
-                * (CHUNK_RESOLUTION_WIDTH + 2),
-        );
-
-        for iz in -1..(CHUNK_RESOLUTION_DEPTH as i32 + 1) {
-            for iy in -1..(CHUNK_RESOLUTION_HEIGHT as i32 + 1) {
-                for ix in -1..(CHUNK_RESOLUTION_WIDTH as i32 + 1) {
-                    let mut block_index = V3I::new(ix, iy, iz);
-                    let mut chunk_index = *chunk_index;
-
-                    if ix < 0 {
-                        block_index.set_x(ix + (CHUNK_RESOLUTION_WIDTH as i32));
-                        chunk_index.set_x(chunk_index.get_x() - 1);
-                    } else if CHUNK_RESOLUTION_WIDTH as i32 <= ix {
-                        block_index.set_x(ix - (CHUNK_RESOLUTION_WIDTH as i32));
-                        chunk_index.set_x(chunk_index.get_x() + 1);
-                    }
-                    if iy < 0 {
-                        block_index.set_y(iy + (CHUNK_RESOLUTION_HEIGHT as i32));
-                        chunk_index.set_y(chunk_index.get_y() - 1);
-                    } else if CHUNK_RESOLUTION_HEIGHT as i32 <= iy {
-                        block_index.set_y(iy - (CHUNK_RESOLUTION_HEIGHT as i32));
-                        chunk_index.set_y(chunk_index.get_y() + 1);
-                    }
-                    if iz < 0 {
-                        block_index.set_z(iz + (CHUNK_RESOLUTION_DEPTH as i32));
-                        chunk_index.set_z(chunk_index.get_z() - 1);
-                    } else if CHUNK_RESOLUTION_DEPTH as i32 <= iz {
-                        block_index.set_z(iz - (CHUNK_RESOLUTION_DEPTH as i32));
-                        chunk_index.set_z(chunk_index.get_z() + 1);
-                    }
-                    let mut cell = Block::Air;
-                    let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_index);
-
-                    if let Some(result_chunk) = chunk_option {
-                        // console_log!("chunk!");
-
-                        let block_option =
-                            result_chunk.get_block_option_by_block_index(&block_index);
-                        if let Some(result_cell) = block_option {
-                            cell = *result_cell;
-                            // console_log!("cell!");
-                        }
-                    }
-                    block_buffer.push(cell);
-                }
-            }
-        }
-        // console_log!("{}", block_buffer.len());
-
-        block_buffer
-    }
 
     pub fn draw(&mut self) {
         let chunk_index_list: Vec<V3I> = self
@@ -255,5 +199,61 @@ impl Universe {
             + y * (UNIVERSE_RESOLUTION_WIDTH as i32)
             + x;
         self.chunk_list.get_mut(i as usize)
+    }
+    fn make_block_buffer(&mut self, chunk_index: &V3I) -> Vec<Block> {
+        let mut block_buffer = vec![];
+        block_buffer.reserve(
+            (CHUNK_RESOLUTION_DEPTH + 2)
+                * (CHUNK_RESOLUTION_HEIGHT + 2)
+                * (CHUNK_RESOLUTION_WIDTH + 2),
+        );
+
+        for iz in -1..(CHUNK_RESOLUTION_DEPTH as i32 + 1) {
+            for iy in -1..(CHUNK_RESOLUTION_HEIGHT as i32 + 1) {
+                for ix in -1..(CHUNK_RESOLUTION_WIDTH as i32 + 1) {
+                    let mut block_index = V3I::new(ix, iy, iz);
+                    let mut chunk_index = *chunk_index;
+
+                    if ix < 0 {
+                        block_index.set_x(ix + (CHUNK_RESOLUTION_WIDTH as i32));
+                        chunk_index.set_x(chunk_index.get_x() - 1);
+                    } else if CHUNK_RESOLUTION_WIDTH as i32 <= ix {
+                        block_index.set_x(ix - (CHUNK_RESOLUTION_WIDTH as i32));
+                        chunk_index.set_x(chunk_index.get_x() + 1);
+                    }
+                    if iy < 0 {
+                        block_index.set_y(iy + (CHUNK_RESOLUTION_HEIGHT as i32));
+                        chunk_index.set_y(chunk_index.get_y() - 1);
+                    } else if CHUNK_RESOLUTION_HEIGHT as i32 <= iy {
+                        block_index.set_y(iy - (CHUNK_RESOLUTION_HEIGHT as i32));
+                        chunk_index.set_y(chunk_index.get_y() + 1);
+                    }
+                    if iz < 0 {
+                        block_index.set_z(iz + (CHUNK_RESOLUTION_DEPTH as i32));
+                        chunk_index.set_z(chunk_index.get_z() - 1);
+                    } else if CHUNK_RESOLUTION_DEPTH as i32 <= iz {
+                        block_index.set_z(iz - (CHUNK_RESOLUTION_DEPTH as i32));
+                        chunk_index.set_z(chunk_index.get_z() + 1);
+                    }
+                    let mut cell = Block::Air;
+                    let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_index);
+
+                    if let Some(result_chunk) = chunk_option {
+                        // console_log!("chunk!");
+
+                        let block_option =
+                            result_chunk.get_block_option_by_block_index(&block_index);
+                        if let Some(result_cell) = block_option {
+                            cell = *result_cell;
+                            // console_log!("cell!");
+                        }
+                    }
+                    block_buffer.push(cell);
+                }
+            }
+        }
+        // console_log!("{}", block_buffer.len());
+
+        block_buffer
     }
 }
