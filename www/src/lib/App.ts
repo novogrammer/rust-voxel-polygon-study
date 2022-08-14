@@ -66,16 +66,16 @@ export default class App{
     const loadEXRTextureAsync=(baseDir:string,filename:string)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new EXRLoader().setPath(baseDir).load(filename,(texture)=>{
-          texture.encoding=THREE.sRGBEncoding;
+          texture.encoding=THREE.LinearEncoding;
           texture.needsUpdate=true;
           resolve(texture);
         });
       });
     };
-    const loadTextureAsync=(baseDir:string,filename:string)=>{
+    const loadTextureAsync=(baseDir:string,filename:string,isLinear:boolean=true)=>{
       return new Promise<THREE.Texture>((resolve)=>{
         new THREE.TextureLoader().setPath(baseDir).load(filename,(texture)=>{
-          texture.encoding=THREE.sRGBEncoding;
+          texture.encoding=isLinear?THREE.LinearEncoding:THREE.sRGBEncoding;
           texture.needsUpdate=true;
           resolve(texture);
         });
@@ -183,7 +183,7 @@ export default class App{
 
     const material=await(async()=>{
       const baseDir="./textures/packed/";
-      const diff=await loadTextureAsync(baseDir,"packed_diff.jpg");
+      const diff=await loadTextureAsync(baseDir,"packed_diff.jpg",false);
       // const disp=await loadTextureAsync(baseDir,"packed_disp.png");
       // const nor=await loadEXRTextureAsync(baseDir,"packed_nor_gl.exr");
       const nor=await loadTextureAsync(baseDir,"packed_nor_gl.png");
