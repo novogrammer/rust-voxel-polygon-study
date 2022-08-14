@@ -45,6 +45,7 @@ export default class App{
       antialias: true,
       canvas:document.querySelector("#View") as HTMLCanvasElement,
     });
+    renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth,window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.outputEncoding = THREE.sRGBEncoding;
@@ -57,7 +58,7 @@ export default class App{
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     const spotLight = new THREE.SpotLight(0xffffff, 1.2,1000,THREE.MathUtils.degToRad(45));
-  
+    spotLight.castShadow=true;
     spotLight.position.set(50, 50, 50);
     spotLight.lookAt(0,0,0);
     scene.add(spotLight);
@@ -257,6 +258,8 @@ export default class App{
       bufferGeometryList.push(bufferGeometry);
       const mesh=new THREE.Mesh(bufferGeometry,material);
       mesh.frustumCulled=false;
+      mesh.receiveShadow=true;
+      mesh.castShadow=true;
       const origin=universe.get_chunk_origin(i);
       mesh.position.set(origin.get_x(),origin.get_y(),origin.get_z());
       scene.add(mesh);
@@ -330,6 +333,7 @@ export default class App{
     if(this.three){
       const {camera,renderer}=this.three;
       renderer.setSize(window.innerWidth,window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
       camera.aspect=window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
 
