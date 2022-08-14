@@ -26,6 +26,10 @@ const texture_params_list=[
     name:"rough",
     ext:"jpg",
   },
+  {
+    name:"metal",
+    ext:"png",
+  },
 ];
 
 

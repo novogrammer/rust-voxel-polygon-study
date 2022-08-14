@@ -195,13 +195,14 @@ export default class App{
       const nor=await loadTextureAsync(baseDir,"packed_nor_gl.png");
       // const rough=await loadEXRTextureAsync(baseDir,"packed_rough.exr");
       const rough=await loadTextureAsync(baseDir,"packed_rough.jpg");
+      const metal=await loadTextureAsync(baseDir,"packed_metal.png");
 
-      [diff,nor,rough].forEach(setupTexture);
+      [diff,nor,rough,metal].forEach(setupTexture);
     
       const material=new THREE.MeshStandardMaterial({
         map:diff,
         roughnessMap:rough,
-        metalness:0,
+        metalnessMap:metal,
         normalMap:nor,
         // displacementMap:disp,
         vertexColors:true,
