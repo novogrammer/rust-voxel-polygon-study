@@ -5,7 +5,7 @@ use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT, v3f::V3F};
 pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
 pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
 
-const SCENE_QTY: i32 = 3;
+const SCENE_QTY: i32 = 4;
 const SCENE_DURATION: f32 = 6.0;
 const INTRO_DURATION: f32 = 2.0;
 const OUTRO_DURATION: f32 = 2.0;
@@ -42,10 +42,11 @@ impl TerrainUpdater {
 
         let to_base_maker = |scene_index, time_for_generate| -> Box<UpdaterType> {
             match scene_index {
-                0 => terrain_updater_a_maker(time_for_generate),
-                1 => terrain_updater_b_maker(time_for_generate),
-                2 => terrain_updater_c_maker(time_for_generate),
-                _ => terrain_updater_b_maker(time_for_generate),
+                0 => terrain_updater_snowfield_maker(time_for_generate),
+                1 => terrain_updater_sinewave_maker(time_for_generate),
+                2 => terrain_updater_plain_maker(time_for_generate),
+                3 => terrain_updater_desert_maker(time_for_generate),
+                _ => terrain_updater_plain_maker(time_for_generate),
             }
         };
         let to_level =
@@ -110,7 +111,7 @@ impl TerrainUpdater {
     }
 }
 
-pub fn terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
+pub fn terrain_updater_sinewave_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         let ground_level = (global_position.x() * 5.0 + time as f32 * 30.0)
@@ -129,7 +130,7 @@ pub fn terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
     Box::new(f)
 }
 
-pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
+pub fn terrain_updater_plain_maker(time: f64) -> Box<UpdaterType> {
     let noise = OpenSimplex::default();
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
@@ -174,7 +175,7 @@ pub fn terrain_updater_x_maker(time: f64) -> Box<UpdaterType> {
     };
     Box::new(f)
 }
-pub fn terrain_updater_c_maker(time: f64) -> Box<UpdaterType> {
+pub fn terrain_updater_desert_maker(time: f64) -> Box<UpdaterType> {
     let noise = OpenSimplex::default();
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
@@ -192,6 +193,29 @@ pub fn terrain_updater_c_maker(time: f64) -> Box<UpdaterType> {
             if global_position.y() < ground_level {
                 next_cell = Block::Sand;
             }
+        }
+        Some(next_cell)
+    };
+
+    Box::new(f)
+}
+pub fn terrain_updater_snowfield_maker(time: f64) -> Box<UpdaterType> {
+    let noise = OpenSimplex::default();
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
+        let mut next_cell = Block::Air;
+
+        let value = noise.get([
+            global_position.x() as f64 * 0.1,
+            global_position.z() as f64 * 0.1,
+            time,
+        ]) as f32;
+
+        let ground_level = value * 25.0 - 2.0;
+        let snow_level = value * 10.0;
+        if global_position.y() < ground_level {
+            next_cell = Block::Concrete;
+        } else if global_position.y() < snow_level {
+            next_cell = Block::Snow;
         }
         Some(next_cell)
     };
