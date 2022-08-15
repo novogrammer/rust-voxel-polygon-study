@@ -302,11 +302,18 @@ impl Chunk {
             result
         };
 
-        let rock_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+        let weed_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
             .map(remap_uv)
-            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.5))
+            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.75))
             .collect();
+
+        let metal_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.75))
+            .collect();
+
         let brick_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
             .map(remap_uv)
@@ -317,15 +324,15 @@ impl Chunk {
             .map(remap_uv)
             .map(|uv| uv * 0.25 + glam::vec2(0.75, 0.75))
             .collect();
-        let sand_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+        let dirt_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
             .map(remap_uv)
-            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.75))
+            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.5))
             .collect();
-        let metal_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+        let rock_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
             .iter()
             .map(remap_uv)
-            .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.75))
+            .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.5))
             .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
@@ -344,11 +351,13 @@ impl Chunk {
             side1: glam::Vec3,
             side2: glam::Vec3,
             corner: glam::Vec3,
-            rock_uv: glam::Vec2,
+
+            weed_uv: glam::Vec2,
+            metal_uv: glam::Vec2,
             brick_uv: glam::Vec2,
             tile_uv: glam::Vec2,
-            sand_uv: glam::Vec2,
-            metal_uv: glam::Vec2,
+            dirt_uv: glam::Vec2,
+            rock_uv: glam::Vec2,
         }
         struct MyVertexListAndNormalAndMatrix {
             my_vertex_list: Vec<MyVertex>,
@@ -364,11 +373,12 @@ impl Chunk {
                     side1: glam::vec3(position.x() * 2.0, position.y() * 0.0, position.z() * 2.0),
                     side2: glam::vec3(position.x() * 0.0, position.y() * 2.0, position.z() * 2.0),
                     corner: glam::vec3(position.x() * 2.0, position.y() * 2.0, position.z() * 2.0),
-                    rock_uv: *rock_front_face_uv_list.get(i).unwrap(),
+                    weed_uv: *weed_front_face_uv_list.get(i).unwrap(),
+                    metal_uv: *metal_front_face_uv_list.get(i).unwrap(),
                     brick_uv: *brick_front_face_uv_list.get(i).unwrap(),
                     tile_uv: *tile_front_face_uv_list.get(i).unwrap(),
-                    sand_uv: *sand_front_face_uv_list.get(i).unwrap(),
-                    metal_uv: *metal_front_face_uv_list.get(i).unwrap(),
+                    dirt_uv: *dirt_front_face_uv_list.get(i).unwrap(),
+                    rock_uv: *rock_front_face_uv_list.get(i).unwrap(),
                 }
             })
             .collect();
@@ -386,11 +396,12 @@ impl Chunk {
                                 side2: matrix_for_direction.transform_vector3(my_vertex_base.side2),
                                 corner: matrix_for_direction
                                     .transform_vector3(my_vertex_base.corner),
-                                rock_uv: my_vertex_base.rock_uv,
+                                weed_uv: my_vertex_base.weed_uv,
+                                metal_uv: my_vertex_base.metal_uv,
                                 brick_uv: my_vertex_base.brick_uv,
                                 tile_uv: my_vertex_base.tile_uv,
-                                sand_uv: my_vertex_base.sand_uv,
-                                metal_uv: my_vertex_base.metal_uv,
+                                dirt_uv: my_vertex_base.dirt_uv,
+                                rock_uv: my_vertex_base.rock_uv,
                             };
                             vertex_for_direction
                         })
@@ -471,11 +482,12 @@ impl Chunk {
                                     .iter()
                                     .map(|my_vertex| {
                                         let uv = match *cell {
+                                            Block::Metal => &my_vertex.metal_uv,
                                             Block::Brick => &my_vertex.brick_uv,
                                             Block::Tile => &my_vertex.tile_uv,
-                                            Block::Sand => &my_vertex.sand_uv,
-                                            Block::Metal => &my_vertex.metal_uv,
-                                            _ => &my_vertex.rock_uv,
+                                            Block::Dirt => &my_vertex.dirt_uv,
+                                            Block::Rock => &my_vertex.rock_uv,
+                                            _ => &my_vertex.weed_uv,
                                         };
                                         let side1_index = self.calc_index_by_position(
                                             &V3F::from_glam(&(base_position + my_vertex.side1)),

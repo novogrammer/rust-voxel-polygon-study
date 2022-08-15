@@ -120,32 +120,14 @@ pub fn terrain_updater_a_maker(time: f64) -> Box<UpdaterType> {
             * 9.0
             - 10.0;
         if global_position.y() < ground_level - 3.0 {
-            next_cell = Block::Rock;
+            next_cell = Block::Dirt;
         } else if global_position.y() < ground_level {
-            next_cell = Block::Sand;
+            next_cell = Block::Weed;
         }
         Some(next_cell)
     };
     Box::new(f)
 }
-
-// pub fn terrain_updater_b(global_position: &glam::Vec3, time: f64) -> Block {
-//     let mut next_cell = Block::Air;
-//     let mut open_simplex = OpenSimplex::new();
-//     let value = open_simplex.get([
-//         global_position.x() as f64 * 0.1,
-//         global_position.z() as f64 * 0.1,
-//         time,
-//     ]) as f32;
-
-//     let ground_level = value * 10.0;
-//     if global_position.y() < ground_level - 3.0 {
-//         next_cell = Block::Rock;
-//     } else if global_position.y() < ground_level {
-//         next_cell = Block::Sand;
-//     }
-//     next_cell
-// }
 
 pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
     let noise = OpenSimplex::default();
@@ -155,9 +137,9 @@ pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
         if 10.0 < global_position.y() {
             return Some(Block::Air);
         }
-        // Rockであることが確定している座標
+        // Dirtであることが確定している座標
         if global_position.y() < -13.0 {
-            return Some(Block::Rock);
+            return Some(Block::Dirt);
         }
         let value = noise.get([
             global_position.x() as f64 * 0.1,
@@ -167,9 +149,9 @@ pub fn terrain_updater_b_maker(time: f64) -> Box<UpdaterType> {
 
         let ground_level = value * 10.0;
         if global_position.y() < ground_level - 3.0 {
-            next_cell = Block::Rock;
+            next_cell = Block::Dirt;
         } else if global_position.y() < ground_level {
-            next_cell = Block::Sand;
+            next_cell = Block::Weed;
         }
         Some(next_cell)
     };
@@ -181,7 +163,7 @@ pub fn terrain_updater_x_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         if global_position.length() < (32.0 * (time.sin() * 0.5 + 0.5)) as f32 {
-            next_cell = Block::Sand;
+            next_cell = Block::Weed;
         }
         if (*global_position + glam::vec3(10.0, 0.0, 0.0)).length()
             < (32.0 * (time.sin() * 0.5 + 0.5)) as f32

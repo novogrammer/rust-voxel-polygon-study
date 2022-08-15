@@ -3,10 +3,11 @@ const { execSync } = require('child_process');
 
 const size="1k";
 const material_list=[
-  "coast_sand_rocks_02",
+  "forrest_ground_01",
   "metal_plate",
   "red_brick_03",
   "stone_brick_wall_001",
+  "red_mud_stones",
   "rock_boulder_cracked",
 ];
 const texture_params_list=[

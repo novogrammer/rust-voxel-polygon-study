@@ -8,10 +8,11 @@ pub const BLOCK_SIZE_DEPTH: f32 = 1.0;
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Block {
-    Air = 0,
-    Rock = 1,
+    Air = 0xff,
+    Weed = 0,
+    Metal = 1,
     Brick = 2,
     Tile = 3,
-    Sand = 4,
-    Metal = 5,
+    Dirt = 4,
+    Rock = 5,
 }
