@@ -9,6 +9,11 @@ const material_list=[
   "stone_brick_wall_001",
   "red_mud_stones",
   "rock_boulder_cracked",
+  "stone_wall",
+  "coast_sand_01",
+  "bark_brown_02",
+  "snow_02",
+  "granular_concrete",
 ];
 const texture_params_list=[
   {

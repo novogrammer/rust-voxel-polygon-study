@@ -15,4 +15,9 @@ pub enum Block {
     Tile = 3,
     Dirt = 4,
     Rock = 5,
+    Stone = 6,
+    Sand = 7,
+    Wood = 8,
+    Snow = 9,
+    Concrete = 10,
 }

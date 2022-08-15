@@ -190,7 +190,7 @@ pub fn terrain_updater_c_maker(time: f64) -> Box<UpdaterType> {
 
             let ground_level = value * 10.0;
             if global_position.y() < ground_level {
-                next_cell = Block::Rock;
+                next_cell = Block::Sand;
             }
         }
         Some(next_cell)

@@ -334,6 +334,31 @@ impl Chunk {
             .map(remap_uv)
             .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.5))
             .collect();
+        let stone_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.5, 0.5))
+            .collect();
+        let sand_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.75, 0.5))
+            .collect();
+        let wood_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.0, 0.25))
+            .collect();
+        let snow_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.25, 0.25))
+            .collect();
+        let concrete_front_face_uv_list: Vec<glam::Vec2> = base_uv_list
+            .iter()
+            .map(remap_uv)
+            .map(|uv| uv * 0.25 + glam::vec2(0.5, 0.25))
+            .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
         let front_face_normal = glam::vec3(0.0, 0.0, 1.0);
@@ -358,6 +383,11 @@ impl Chunk {
             tile_uv: glam::Vec2,
             dirt_uv: glam::Vec2,
             rock_uv: glam::Vec2,
+            stone_uv: glam::Vec2,
+            sand_uv: glam::Vec2,
+            wood_uv: glam::Vec2,
+            snow_uv: glam::Vec2,
+            concrete_uv: glam::Vec2,
         }
         struct MyVertexListAndNormalAndMatrix {
             my_vertex_list: Vec<MyVertex>,
@@ -379,6 +409,11 @@ impl Chunk {
                     tile_uv: *tile_front_face_uv_list.get(i).unwrap(),
                     dirt_uv: *dirt_front_face_uv_list.get(i).unwrap(),
                     rock_uv: *rock_front_face_uv_list.get(i).unwrap(),
+                    stone_uv: *stone_front_face_uv_list.get(i).unwrap(),
+                    sand_uv: *sand_front_face_uv_list.get(i).unwrap(),
+                    wood_uv: *wood_front_face_uv_list.get(i).unwrap(),
+                    snow_uv: *snow_front_face_uv_list.get(i).unwrap(),
+                    concrete_uv: *concrete_front_face_uv_list.get(i).unwrap(),
                 }
             })
             .collect();
@@ -402,6 +437,11 @@ impl Chunk {
                                 tile_uv: my_vertex_base.tile_uv,
                                 dirt_uv: my_vertex_base.dirt_uv,
                                 rock_uv: my_vertex_base.rock_uv,
+                                stone_uv: my_vertex_base.stone_uv,
+                                sand_uv: my_vertex_base.sand_uv,
+                                wood_uv: my_vertex_base.wood_uv,
+                                snow_uv: my_vertex_base.snow_uv,
+                                concrete_uv: my_vertex_base.concrete_uv,
                             };
                             vertex_for_direction
                         })
@@ -487,6 +527,11 @@ impl Chunk {
                                             Block::Tile => &my_vertex.tile_uv,
                                             Block::Dirt => &my_vertex.dirt_uv,
                                             Block::Rock => &my_vertex.rock_uv,
+                                            Block::Stone => &my_vertex.stone_uv,
+                                            Block::Sand => &my_vertex.sand_uv,
+                                            Block::Wood => &my_vertex.wood_uv,
+                                            Block::Snow => &my_vertex.snow_uv,
+                                            Block::Concrete => &my_vertex.concrete_uv,
                                             _ => &my_vertex.weed_uv,
                                         };
                                         let side1_index = self.calc_index_by_position(
