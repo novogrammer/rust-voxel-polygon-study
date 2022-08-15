@@ -56,7 +56,7 @@ export default class App{
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.position.y = 5;
-    camera.position.z = 30;
+    camera.position.z = 50;
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.autoRotate=true;
     controls.autoRotateSpeed=1.0;

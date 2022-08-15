@@ -42,13 +42,13 @@ impl TerrainUpdater {
 
         let to_base_maker = |scene_index, time_for_generate| -> Box<UpdaterType> {
             match scene_index {
-                0 => terrain_updater_brickhouse_maker(time_for_generate),
-                1 => terrain_updater_mountain_maker(time_for_generate),
-                2 => terrain_updater_snowfield_maker(time_for_generate),
-                3 => terrain_updater_sinewave_maker(time_for_generate),
+                0 => terrain_updater_skyscraper_maker(time_for_generate),
+                1 => terrain_updater_brickhouse_maker(time_for_generate),
+                2 => terrain_updater_mountain_maker(time_for_generate),
+                3 => terrain_updater_snowfield_maker(time_for_generate),
                 4 => terrain_updater_plain_maker(time_for_generate),
                 5 => terrain_updater_desert_maker(time_for_generate),
-                _ => terrain_updater_plain_maker(time_for_generate),
+                _ => terrain_updater_sinewave_maker(time_for_generate),
             }
         };
         let to_level =
@@ -296,6 +296,61 @@ pub fn terrain_updater_brickhouse_maker(time: f64) -> Box<UpdaterType> {
         if global_position.y() < -2.0 {
             next_cell = Block::Stone;
         }
+        Some(next_cell)
+    };
+
+    Box::new(f)
+}
+
+pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
+    let noise = OpenSimplex::default();
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
+        let mut next_cell = Block::Air;
+        let repeated_position = glam::vec3(
+            global_position.x().abs() % 16.0,
+            global_position.y(),
+            global_position.z().abs() % 16.0,
+        );
+        let repeated_origin_8 = glam::vec3(
+            ((global_position.x() / 8.0).floor()
+                + if global_position.x() < 0.0 { -1.0 } else { 0.0 })
+                * 8.0,
+            0.0,
+            ((global_position.z() / 8.0).floor()
+                + if global_position.z() < 0.0 { -1.0 } else { 0.0 })
+                * 8.0,
+        );
+        if (1.0 < repeated_position.x() && repeated_position.x() < 15.0)
+            && (1.0 < repeated_position.z() && repeated_position.z() < 15.0)
+        {
+            let value = noise.get([
+                repeated_origin_8.x() as f64 * 0.1,
+                repeated_origin_8.z() as f64 * 0.1,
+                time,
+            ]) as f32;
+            if repeated_position.y() < 0.0 {
+                if (global_position.x().abs() % 2.0) + (global_position.z().abs() % 2.0) < 2.0 {
+                    next_cell = Block::Metal;
+                } else {
+                    next_cell = Block::Rock;
+                }
+            } else {
+                if repeated_position.y() < 20.0 + value * 24.0 {
+                    if value < -0.1 {
+                        next_cell = Block::Brick;
+                    } else if value < 0.1 {
+                        next_cell = Block::Metal;
+                    } else {
+                        next_cell = Block::Concrete;
+                    }
+                }
+            }
+        } else if repeated_position.y() < -1.0 {
+            next_cell = Block::Rock;
+        } else if repeated_position.y() < 0.0 {
+            next_cell = Block::Tile;
+        }
+
         Some(next_cell)
     };
 
