@@ -16,20 +16,29 @@
       }
       .go-github{
         position:fixed;
-        right:0;
-        bottom:0;
-        color:#00f;
+        right:1.0vw;
+        bottom:1.0vw;
+        color:#000;
         border:1px solid;
         border-radius: 9999px;
         padding:0 5px;
         background:rgba(255,255,255,0.5);
         text-decoration: none;
+        font-size:2vw;
+        line-height:3vw;
+        padding:0.5vw;
+      }
+      .go-github img{
+        width:auto;
+        height:3vw;
+        vertical-align: bottom;
+        margin-right:0.5vw;
       }
     </style>
   </head>
   <body>
     <canvas id="View"></canvas>
-    <a class="go-github" href="https://github.com/novogrammer/rust-voxel-polygon-study">GitHub</a>
+    <a class="go-github" href="https://github.com/novogrammer/rust-voxel-polygon-study"><img src="./img/GitHub-Mark-64px.png"alt="GitHub">GitHub repo</a>
     <div class="loading-text">Loading...</div>
     <script src="./bootstrap.js"></script>
   </body>

@@ -28,6 +28,10 @@ module.exports = {
           from:"./src/textures",
           to:"./textures",
         },
+        {
+          from:"./src/img",
+          to:"./img",
+        },
       ]
     )
   ],
