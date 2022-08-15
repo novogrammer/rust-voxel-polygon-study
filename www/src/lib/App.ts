@@ -350,7 +350,6 @@ export default class App{
     const {stats}=this;
     switch(event.key){
       case "a":
-        console.log("a")
         controls.autoRotate=!controls.autoRotate;
         break;
       case "d":
