@@ -89,10 +89,10 @@ export default class App{
       });
     };
     const setupTexture=(t:THREE.Texture)=>{
-      t.minFilter= THREE.NearestFilter;
-      t.magFilter= THREE.NearestFilter;
-      // t.minFilter= THREE.LinearFilter;
-      // t.magFilter= THREE.LinearFilter;
+      // t.minFilter= THREE.NearestFilter;
+      // t.magFilter= THREE.NearestFilter;
+      t.minFilter= THREE.LinearFilter;
+      t.magFilter= THREE.LinearFilter;
       t.generateMipmaps=true;
       t.needsUpdate=true;
     };
