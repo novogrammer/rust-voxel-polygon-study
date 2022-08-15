@@ -294,7 +294,7 @@ impl Chunk {
         let pp = glam::vec2(1.0, 1.0);
         let base_uv_list = vec![mm, pm, mp, pp];
         let remap_uv = |uv: &glam::Vec2| {
-            let each_image_size = 512.0;
+            let each_image_size = 256.0;
             let padding = 8.0;
             let one = 1.0 / each_image_size;
             let result =

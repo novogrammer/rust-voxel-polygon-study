@@ -48,7 +48,8 @@ for (let texture_params of texture_params_list){
       break;
   }
   // const geometry="1024x1024";
-  const geometry="512x512";
+  // const geometry="512x512";
+  const geometry="256x256";
   const result = execSync(`montage -tile 4x4 -geometry ${geometry} ${files.join(" ")} ${option_for_ext} dist/packed_${texture_params.name}.${texture_params.ext}`);
   console.log(result.toString());
 }
