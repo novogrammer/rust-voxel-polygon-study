@@ -5,7 +5,7 @@ use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT, v3f::V3F};
 pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
 pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
 
-const SCENE_QTY: i32 = 5;
+const SCENE_QTY: i32 = 6;
 const SCENE_DURATION: f32 = 6.0;
 const INTRO_DURATION: f32 = 2.0;
 const OUTRO_DURATION: f32 = 2.0;
@@ -42,11 +42,12 @@ impl TerrainUpdater {
 
         let to_base_maker = |scene_index, time_for_generate| -> Box<UpdaterType> {
             match scene_index {
-                0 => terrain_updater_mountain_maker(time_for_generate),
-                1 => terrain_updater_snowfield_maker(time_for_generate),
-                2 => terrain_updater_sinewave_maker(time_for_generate),
-                3 => terrain_updater_plain_maker(time_for_generate),
-                4 => terrain_updater_desert_maker(time_for_generate),
+                0 => terrain_updater_brickhouse_maker(time_for_generate),
+                1 => terrain_updater_mountain_maker(time_for_generate),
+                2 => terrain_updater_snowfield_maker(time_for_generate),
+                3 => terrain_updater_sinewave_maker(time_for_generate),
+                4 => terrain_updater_plain_maker(time_for_generate),
+                5 => terrain_updater_desert_maker(time_for_generate),
                 _ => terrain_updater_plain_maker(time_for_generate),
             }
         };
@@ -239,6 +240,60 @@ pub fn terrain_updater_mountain_maker(time: f64) -> Box<UpdaterType> {
         if global_position.y() < ground_level {
             next_cell = Block::Rock;
         } else if global_position.y() < stone_level {
+            next_cell = Block::Stone;
+        }
+        Some(next_cell)
+    };
+
+    Box::new(f)
+}
+pub fn terrain_updater_brickhouse_maker(time: f64) -> Box<UpdaterType> {
+    let noise = OpenSimplex::default();
+    let f = move |global_position: &glam::Vec3| -> Option<Block> {
+        let mut next_cell = Block::Air;
+
+        let value = noise.get([
+            global_position.x() as f64 * 0.03,
+            global_position.z() as f64 * 0.03,
+            time,
+        ]) as f32;
+
+        let ground_level = value * 3.0;
+        if -2.0 < global_position.y()
+            && global_position.y() < 1.0
+            && (-10.0 < global_position.x() && global_position.x() < 10.0)
+            && (-6.0 < global_position.z() && global_position.z() < 6.0)
+        {
+            next_cell = Block::Stone;
+        } else if (1.0 < global_position.y() && global_position.y() < 12.0)
+            && (-8.0 < global_position.x() && global_position.x() < 8.0)
+            && (-4.0 < global_position.z() && global_position.z() < 4.0)
+        {
+            if 7.0 < global_position.y() {
+                if global_position.y() < (4.0 - global_position.z().abs()) + 7.0 {
+                    next_cell = Block::Brick;
+                } else if global_position.y() < (4.0 - global_position.z().abs()) + 8.0 {
+                    next_cell = Block::Tile;
+                }
+            } else if (-7.0 < global_position.x() && global_position.x() < 7.0)
+                && (-3.0 < global_position.z() && global_position.z() < 3.0)
+            {
+                next_cell = Block::Air;
+            } else if (3.0 < global_position.y() && global_position.y() < 5.0)
+                && ((-6.0 < global_position.x() && global_position.x() < -4.0)
+                    || (-1.0 < global_position.x() && global_position.x() < 1.0)
+                    || (4.0 < global_position.x() && global_position.x() < 6.0))
+            {
+                next_cell = Block::Air;
+            } else {
+                next_cell = Block::Brick;
+            }
+        } else if global_position.y() < ground_level - 1.0 {
+            next_cell = Block::Dirt;
+        } else if global_position.y() < ground_level {
+            next_cell = Block::Weed;
+        }
+        if global_position.y() < -2.0 {
             next_cell = Block::Stone;
         }
         Some(next_cell)
