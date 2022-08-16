@@ -323,11 +323,6 @@ pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
         if (1.0 < repeated_position.x() && repeated_position.x() < 15.0)
             && (1.0 < repeated_position.z() && repeated_position.z() < 15.0)
         {
-            let value = noise.get([
-                repeated_origin_8.x() as f64 * 0.1,
-                repeated_origin_8.z() as f64 * 0.1,
-                time,
-            ]) as f32;
             if repeated_position.y() < 0.0 {
                 if (global_position.x().abs() % 2.0) + (global_position.z().abs() % 2.0) < 2.0 {
                     next_cell = Block::Metal;
@@ -335,6 +330,11 @@ pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
                     next_cell = Block::Rock;
                 }
             } else {
+                let value = noise.get([
+                    repeated_origin_8.x() as f64 * 0.1,
+                    repeated_origin_8.z() as f64 * 0.1,
+                    time,
+                ]) as f32;
                 if repeated_position.y() < 20.0 + value * 24.0 {
                     if value < -0.1 {
                         next_cell = Block::Brick;
