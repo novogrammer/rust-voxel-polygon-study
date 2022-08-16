@@ -306,48 +306,65 @@ pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
     let noise = OpenSimplex::default();
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
-        let repeated_position = glam::vec3(
+        let section_position = glam::vec3(
             global_position.x().abs() % 16.0,
             global_position.y(),
             global_position.z().abs() % 16.0,
         );
-        let repeated_origin_8 = glam::vec3(
-            ((global_position.x() / 8.0).floor()
-                + if global_position.x() < 0.0 { -1.0 } else { 0.0 })
-                * 8.0,
-            0.0,
-            ((global_position.z() / 8.0).floor()
-                + if global_position.z() < 0.0 { -1.0 } else { 0.0 })
-                * 8.0,
-        );
-        if (1.0 < repeated_position.x() && repeated_position.x() < 15.0)
-            && (1.0 < repeated_position.z() && repeated_position.z() < 15.0)
+
+        if (2.0 < section_position.x() && section_position.x() < 14.0)
+            && (2.0 < section_position.z() && section_position.z() < 14.0)
         {
-            if repeated_position.y() < 0.0 {
-                if (global_position.x().abs() % 2.0) + (global_position.z().abs() % 2.0) < 2.0 {
-                    next_cell = Block::Metal;
-                } else {
-                    next_cell = Block::Rock;
-                }
-            } else {
-                let value = noise.get([
-                    repeated_origin_8.x() as f64 * 0.1,
-                    repeated_origin_8.z() as f64 * 0.1,
-                    time,
-                ]) as f32;
-                if repeated_position.y() < 20.0 + value * 24.0 {
-                    if value < -0.1 {
-                        next_cell = Block::Brick;
-                    } else if value < 0.1 {
+            let building_position = glam::vec3(
+                (section_position.x() - 2.0) % 6.0,
+                section_position.y(),
+                (section_position.z() - 2.0) % 6.0,
+            );
+            if (1.0 < building_position.x()) && (1.0 < building_position.z()) {
+                if building_position.y() < 0.0 {
+                    // 杭
+                    if (global_position.x().abs() % 2.0) + (global_position.z().abs() % 2.0) < 2.0 {
                         next_cell = Block::Metal;
                     } else {
-                        next_cell = Block::Concrete;
+                        next_cell = Block::Rock;
+                    }
+                } else {
+                    let building_origin = glam::vec3(
+                        global_position.x() - building_position.x() * global_position.x().signum(),
+                        0.0,
+                        global_position.z() - building_position.z() * global_position.z().signum(),
+                    );
+                    let value = noise.get([
+                        building_origin.x() as f64 * 0.1,
+                        building_origin.z() as f64 * 0.1,
+                        time,
+                    ]) as f32;
+                    if section_position.y() < 20.0 + value * 24.0 {
+                        if section_position.y() < 19.0 + value * 24.0
+                            && (section_position.y().floor() % 2.0 == 1.0)
+                            && ((section_position.x().floor() % 2.0 == 0.0)
+                                || (section_position.z().floor() % 2.0 == 0.0))
+                        {
+                            next_cell = Block::Air;
+                        } else {
+                            if value < -0.1 {
+                                next_cell = Block::Brick;
+                            } else if value < 0.1 {
+                                next_cell = Block::Metal;
+                            } else {
+                                next_cell = Block::Concrete;
+                            }
+                        }
                     }
                 }
+            } else if section_position.y() < -1.0 {
+                next_cell = Block::Rock;
+            } else if section_position.y() < 0.0 {
+                next_cell = Block::Tile;
             }
-        } else if repeated_position.y() < -1.0 {
+        } else if section_position.y() < -1.0 {
             next_cell = Block::Rock;
-        } else if repeated_position.y() < 0.0 {
+        } else if section_position.y() < 0.0 {
             next_cell = Block::Tile;
         }
 
