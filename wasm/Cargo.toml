@@ -46,11 +46,6 @@ opt-level = 3
 # rustflags = [
 #   "-C", "link-args=-z stack-size=1500000",
 # ]
-# [target.wasm32-unknown-unknown]
-# rustflags = [
-#   "-C", "target-feature=+simd128",
-# ]
-
 
 [package.metadata.wasm-pack.profile.release]
 # previously had just ['-O4']
