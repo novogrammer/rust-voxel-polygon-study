@@ -328,6 +328,8 @@ export default class App{
     const {renderer,scene,camera,bufferGeometryList,controls}=this.three;
     controls.update();
     universe.update(time * 0.001,V3F.new(camera.position.x,camera.position.y,camera.position.z));
+    // universe.update_add_sphere(V3F.new(5,0,0),10.0,2);
+    // universe.update_add_sphere(V3F.new(0,0,0),10.0,0xff);
     universe.draw();
 
     const l=universe.get_chunk_list_length();
