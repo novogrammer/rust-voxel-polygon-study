@@ -7,6 +7,10 @@ import {EXRLoader} from "three/examples/jsm/loaders/EXRLoader.js";
 import { updateBufferGeometry } from "./rust_to_three";
 import Stats from "stats.js"
 
+function isSp() {
+  const ua = navigator.userAgent;
+  return ua.indexOf('iPhone') > 0 || ua.indexOf('iPod') > 0 || ua.indexOf('Android') > 0;
+}
 
 export default class App{
   setupPromise:Promise<void>;
@@ -23,9 +27,17 @@ export default class App{
   };
   stats?:Stats;
   isDebug:boolean;
+  isSp:boolean;
   constructor(){
     this.isDebug=true;
+    this.isSp=isSp();
     this.setupPromise=this.setupAsync();
+  }
+  getMyPixelRatio(){
+    if(this.isSp){
+      return 1;
+    }
+    return window.devicePixelRatio;
   }
   async setupStatsAsync(){
     const stats=new Stats();
@@ -45,12 +57,12 @@ export default class App{
   }
   async setupThreeAsync(){
     const renderer=new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: false,
       canvas:document.querySelector("#View") as HTMLCanvasElement,
     });
     renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth,window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(this.getMyPixelRatio());
     renderer.outputEncoding = THREE.sRGBEncoding;
     
     const scene = new THREE.Scene();
@@ -369,7 +381,7 @@ export default class App{
     if(this.three){
       const {camera,renderer}=this.three;
       renderer.setSize(window.innerWidth,window.innerHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setPixelRatio(this.getMyPixelRatio());
       camera.aspect=window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
 
