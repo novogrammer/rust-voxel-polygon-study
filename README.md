@@ -49,7 +49,15 @@ $ npm run start
 
 ### wasm
 
+（Macでは）うまくコンパイルできないので事前にCargo.tomlを変更しておく
+```
+[package.metadata.wasm-pack.profile.release]
+# wasm-opt = ['-O4', '-g']
+wasm-opt = false
+```
+
 wasmフォルダは事前にbuildしておく必要がある。
+
 ```
 $ cd wasm
 $ docker compose build
