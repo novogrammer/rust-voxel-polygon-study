@@ -97,15 +97,10 @@ impl TerrainUpdater {
                 to_base_maker(scene_index, self.time_for_generate),
             ));
         }
-        f_list.push(Box::new(move |global_position: &glam::Vec3| {
-            let distance_squared = (*global_position - camera_position).length_squared();
-
-            if distance_squared <= CAMERA_SPHERE_RADIUS * CAMERA_SPHERE_RADIUS {
-                Some(Block::Air)
-            } else {
-                None
-            }
-        }));
+        f_list.push(terrain_updater_sphereremove_maker(
+            camera_position,
+            CAMERA_SPHERE_RADIUS,
+        ));
         self.previous_animation_time = animation_time;
         self.previous_scene_index = scene_index;
 
@@ -411,4 +406,21 @@ pub fn terrain_updater_air(_global_position: &glam::Vec3) -> Option<Block> {
 
 pub fn terrain_updater_none(_global_position: &glam::Vec3) -> Option<Block> {
     None
+}
+
+pub fn terrain_updater_sphereremove_maker(
+    sphere_position: glam::Vec3,
+    sphere_radius: f32,
+) -> Box<UpdaterType> {
+    let sphere_radius_squared = sphere_radius * sphere_radius;
+    let f = move |global_position: &glam::Vec3| {
+        let distance_squared = (*global_position - sphere_position).length_squared();
+
+        if distance_squared <= sphere_radius_squared {
+            Some(Block::Air)
+        } else {
+            None
+        }
+    };
+    Box::new(f)
 }
