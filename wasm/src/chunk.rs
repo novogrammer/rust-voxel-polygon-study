@@ -364,12 +364,12 @@ impl Chunk {
         let front_face_normal = glam::vec3a(0.0, 0.0, 1.0);
 
         let matrix_for_direction_list = vec![
-            glam::Mat4::IDENTITY,
-            glam::Mat4::from_rotation_y(90.0_f32.to_radians()),
-            glam::Mat4::from_rotation_y(-90.0_f32.to_radians()),
-            glam::Mat4::from_rotation_y(180.0_f32.to_radians()),
-            glam::Mat4::from_rotation_x(90.0_f32.to_radians()),
-            glam::Mat4::from_rotation_x(-90.0_f32.to_radians()),
+            glam::Affine3A::IDENTITY,
+            glam::Affine3A::from_rotation_y(90.0_f32.to_radians()),
+            glam::Affine3A::from_rotation_y(-90.0_f32.to_radians()),
+            glam::Affine3A::from_rotation_y(180.0_f32.to_radians()),
+            glam::Affine3A::from_rotation_x(90.0_f32.to_radians()),
+            glam::Affine3A::from_rotation_x(-90.0_f32.to_radians()),
         ];
         struct MyVertex {
             position: glam::Vec3A,
@@ -392,7 +392,7 @@ impl Chunk {
         struct MyVertexListAndNormalAndMatrix {
             my_vertex_list: Vec<MyVertex>,
             normal: glam::Vec3A,
-            // matrix: glam::Mat4,
+            // matrix: glam::Affine3A,
         }
 
         let my_vertex_base_list: Vec<MyVertex> = (0..4)
