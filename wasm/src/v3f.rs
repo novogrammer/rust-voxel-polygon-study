@@ -40,7 +40,17 @@ impl V3F {
             z: v.z,
         }
     }
+    pub fn from_glama(v: &glam::Vec3A) -> V3F {
+        V3F {
+            x: v.x,
+            y: v.y,
+            z: v.z,
+        }
+    }
     pub fn to_glam(&self) -> glam::Vec3 {
         glam::vec3(self.get_x(), self.get_y(), self.get_z())
+    }
+    pub fn to_glama(&self) -> glam::Vec3A {
+        glam::vec3a(self.get_x(), self.get_y(), self.get_z())
     }
 }

@@ -279,14 +279,14 @@ impl Chunk {
         let mut uv_list = vec![];
         uv_list.reserve(l);
 
-        // let mmm = glam::vec3(-0.5, -0.5, -0.5);
-        let mmp = glam::vec3(-0.5, -0.5, 0.5);
-        // let mpm = glam::vec3(-0.5, 0.5, -0.5);
-        let mpp = glam::vec3(-0.5, 0.5, 0.5);
-        // let pmm = glam::vec3(0.5, -0.5, -0.5);
-        let pmp = glam::vec3(0.5, -0.5, 0.5);
-        // let ppm = glam::vec3(0.5, 0.5, -0.5);
-        let ppp = glam::vec3(0.5, 0.5, 0.5);
+        // let mmm = glam::vec3a(-0.5, -0.5, -0.5);
+        let mmp = glam::vec3a(-0.5, -0.5, 0.5);
+        // let mpm = glam::vec3a(-0.5, 0.5, -0.5);
+        let mpp = glam::vec3a(-0.5, 0.5, 0.5);
+        // let pmm = glam::vec3a(0.5, -0.5, -0.5);
+        let pmp = glam::vec3a(0.5, -0.5, 0.5);
+        // let ppm = glam::vec3a(0.5, 0.5, -0.5);
+        let ppp = glam::vec3a(0.5, 0.5, 0.5);
         let front_face_position_list = vec![mmp, pmp, mpp, ppp];
         let mm = glam::vec2(0.0, 0.0);
         let mp = glam::vec2(0.0, 1.0);
@@ -361,7 +361,7 @@ impl Chunk {
             .collect();
         let front_face_index_list: Vec<usize> = vec![1, 3, 0, 2, 0, 3];
         let front_face_index_list_flipped: Vec<usize> = vec![0, 1, 2, 3, 2, 1];
-        let front_face_normal = glam::vec3(0.0, 0.0, 1.0);
+        let front_face_normal = glam::vec3a(0.0, 0.0, 1.0);
 
         let matrix_for_direction_list = vec![
             glam::Mat4::IDENTITY,
@@ -372,10 +372,10 @@ impl Chunk {
             glam::Mat4::from_rotation_x(-90.0_f32.to_radians()),
         ];
         struct MyVertex {
-            position: glam::Vec3,
-            side1: glam::Vec3,
-            side2: glam::Vec3,
-            corner: glam::Vec3,
+            position: glam::Vec3A,
+            side1: glam::Vec3A,
+            side2: glam::Vec3A,
+            corner: glam::Vec3A,
 
             weed_uv: glam::Vec2,
             metal_uv: glam::Vec2,
@@ -391,7 +391,7 @@ impl Chunk {
         }
         struct MyVertexListAndNormalAndMatrix {
             my_vertex_list: Vec<MyVertex>,
-            normal: glam::Vec3,
+            normal: glam::Vec3A,
             // matrix: glam::Mat4,
         }
 
@@ -400,9 +400,9 @@ impl Chunk {
                 let position = *front_face_position_list.get(i).unwrap();
                 MyVertex {
                     position: position,
-                    side1: glam::vec3(position.x * 2.0, position.y * 0.0, position.z * 2.0),
-                    side2: glam::vec3(position.x * 0.0, position.y * 2.0, position.z * 2.0),
-                    corner: glam::vec3(position.x * 2.0, position.y * 2.0, position.z * 2.0),
+                    side1: glam::vec3a(position.x * 2.0, position.y * 0.0, position.z * 2.0),
+                    side2: glam::vec3a(position.x * 0.0, position.y * 2.0, position.z * 2.0),
+                    corner: glam::vec3a(position.x * 2.0, position.y * 2.0, position.z * 2.0),
                     weed_uv: *weed_front_face_uv_list.get(i).unwrap(),
                     metal_uv: *metal_front_face_uv_list.get(i).unwrap(),
                     brick_uv: *brick_front_face_uv_list.get(i).unwrap(),
@@ -426,11 +426,13 @@ impl Chunk {
                         .map(|my_vertex_base| {
                             let vertex_for_direction = MyVertex {
                                 position: matrix_for_direction
-                                    .transform_vector3(my_vertex_base.position),
-                                side1: matrix_for_direction.transform_vector3(my_vertex_base.side1),
-                                side2: matrix_for_direction.transform_vector3(my_vertex_base.side2),
+                                    .transform_vector3a(my_vertex_base.position),
+                                side1: matrix_for_direction
+                                    .transform_vector3a(my_vertex_base.side1),
+                                side2: matrix_for_direction
+                                    .transform_vector3a(my_vertex_base.side2),
                                 corner: matrix_for_direction
-                                    .transform_vector3(my_vertex_base.corner),
+                                    .transform_vector3a(my_vertex_base.corner),
                                 weed_uv: my_vertex_base.weed_uv,
                                 metal_uv: my_vertex_base.metal_uv,
                                 brick_uv: my_vertex_base.brick_uv,
@@ -448,7 +450,7 @@ impl Chunk {
                         .collect::<Vec<_>>();
                     MyVertexListAndNormalAndMatrix {
                         my_vertex_list,
-                        normal: matrix_for_direction.transform_vector3(front_face_normal),
+                        normal: matrix_for_direction.transform_vector3a(front_face_normal),
                         // matrix: *matrix_for_direction,
                     }
                 })
@@ -500,7 +502,7 @@ impl Chunk {
                     let i = toi(ix, iy, iz);
                     let cell = block_buffer.get(i as usize).unwrap();
                     let base_position =
-                        glam::vec3(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
+                        glam::vec3a(ix as f32 + 0.5, iy as f32 + 0.5, iz as f32 + 0.5);
 
                     if *cell != Block::Air {
                         for my_vertex_list_and_normal_and_matrix in
@@ -535,25 +537,25 @@ impl Chunk {
                                             _ => &my_vertex.weed_uv,
                                         };
                                         let side1_index = self.calc_index_by_position(
-                                            &V3F::from_glam(&(base_position + my_vertex.side1)),
+                                            &V3F::from_glama(&(base_position + my_vertex.side1)),
                                         );
                                         let side1 = index_to_ao_not_air(side1_index);
                                         let side2_index = self.calc_index_by_position(
-                                            &V3F::from_glam(&(base_position + my_vertex.side2)),
+                                            &V3F::from_glama(&(base_position + my_vertex.side2)),
                                         );
                                         let side2 = index_to_ao_not_air(side2_index);
                                         let corner_index = self.calc_index_by_position(
-                                            &V3F::from_glam(&(base_position + my_vertex.corner)),
+                                            &V3F::from_glama(&(base_position + my_vertex.corner)),
                                         );
                                         let corner = index_to_ao_not_air(corner_index);
                                         let ao = vertex_a_o(side1, side2, corner);
 
                                         (
                                             Vertex {
-                                                position: V3F::from_glam(
+                                                position: V3F::from_glama(
                                                     &(base_position + my_vertex.position),
                                                 ),
-                                                normal: V3F::from_glam(&normal),
+                                                normal: V3F::from_glama(&normal),
                                                 uv: V2F::from_glam(&uv),
                                                 color: make_ao_color(ao),
                                             },
