@@ -1,6 +1,10 @@
 use noise::{NoiseFn, OpenSimplex};
 
-use crate::{block::Block, universe::UNIVERSE_SIZE_HEIGHT, v3f::V3F};
+use crate::{
+    block::Block,
+    universe::{UNIVERSE_SIZE_DEPTH, UNIVERSE_SIZE_HEIGHT, UNIVERSE_SIZE_WIDTH},
+    v3f::V3F,
+};
 
 pub type UpdaterType = dyn Fn(&glam::Vec3) -> Option<Block>;
 pub type ConditionType = dyn Fn(&glam::Vec3) -> bool;
@@ -97,10 +101,15 @@ impl TerrainUpdater {
                 to_base_maker(scene_index, self.time_for_generate),
             ));
         }
-        f_list.push(terrain_updater_sphereremove_maker(
-            camera_position,
-            CAMERA_SPHERE_RADIUS,
-        ));
+        if (camera_position.x().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_WIDTH)
+            && (camera_position.y().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_HEIGHT)
+            && (camera_position.z().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_DEPTH)
+        {
+            f_list.push(terrain_updater_sphereremove_maker(
+                camera_position,
+                CAMERA_SPHERE_RADIUS,
+            ));
+        }
         self.previous_animation_time = animation_time;
         self.previous_scene_index = scene_index;
 

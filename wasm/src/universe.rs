@@ -90,6 +90,8 @@ impl Universe {
     }
     pub fn update(&mut self, time: f64, camera_position: V3F) {
         let mut chunk_to_invalidate_list = vec![];
+        // 要素が少ないので悲観的な値でreserve
+        chunk_to_invalidate_list.reserve(CHUNK_LIST_LENGTH * 9);
 
         // let my_terrain_updater = |global_position: &glam::Vec3, time: f64| -> Block {
         //     // terrain_updater_a(global_position, time)
@@ -103,8 +105,8 @@ impl Universe {
             let mut v = chunk.update(&my_terrain_updater);
             chunk_to_invalidate_list.append(&mut v);
         }
-        for chunk_to_invalidate in chunk_to_invalidate_list {
-            let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_to_invalidate);
+        for chunk_to_invalidate in &chunk_to_invalidate_list {
+            let chunk_option = self.get_mut_chunk_option_by_chunk_index(chunk_to_invalidate);
             if let Some(chunk) = chunk_option {
                 chunk.needs_draw = true;
             }
