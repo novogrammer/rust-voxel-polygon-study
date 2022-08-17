@@ -364,7 +364,7 @@ impl Chunk {
         let front_face_normal = glam::vec3(0.0, 0.0, 1.0);
 
         let matrix_for_direction_list = vec![
-            glam::Mat4::identity(),
+            glam::Mat4::IDENTITY,
             glam::Mat4::from_rotation_y(90.0_f32.to_radians()),
             glam::Mat4::from_rotation_y(-90.0_f32.to_radians()),
             glam::Mat4::from_rotation_y(180.0_f32.to_radians()),
@@ -400,9 +400,9 @@ impl Chunk {
                 let position = *front_face_position_list.get(i).unwrap();
                 MyVertex {
                     position: position,
-                    side1: glam::vec3(position.x() * 2.0, position.y() * 0.0, position.z() * 2.0),
-                    side2: glam::vec3(position.x() * 0.0, position.y() * 2.0, position.z() * 2.0),
-                    corner: glam::vec3(position.x() * 2.0, position.y() * 2.0, position.z() * 2.0),
+                    side1: glam::vec3(position.x * 2.0, position.y * 0.0, position.z * 2.0),
+                    side2: glam::vec3(position.x * 0.0, position.y * 2.0, position.z * 2.0),
+                    corner: glam::vec3(position.x * 2.0, position.y * 2.0, position.z * 2.0),
                     weed_uv: *weed_front_face_uv_list.get(i).unwrap(),
                     metal_uv: *metal_front_face_uv_list.get(i).unwrap(),
                     brick_uv: *brick_front_face_uv_list.get(i).unwrap(),
@@ -508,9 +508,9 @@ impl Chunk {
                         {
                             let normal = &my_vertex_list_and_normal_and_matrix.normal;
                             let next_index = toi(
-                                ix + (normal.x() as i32),
-                                iy + (normal.y() as i32),
-                                iz + (normal.z() as i32),
+                                ix + (normal.x as i32),
+                                iy + (normal.y as i32),
+                                iz + (normal.z as i32),
                             );
                             let next_cell = block_buffer.get(next_index as usize).unwrap();
                             if *next_cell == Block::Air {

@@ -35,9 +35,9 @@ impl V3F {
 impl V3F {
     pub fn from_glam(v: &glam::Vec3) -> V3F {
         V3F {
-            x: v.x(),
-            y: v.y(),
-            z: v.z(),
+            x: v.x,
+            y: v.y,
+            z: v.z,
         }
     }
     pub fn to_glam(&self) -> glam::Vec3 {

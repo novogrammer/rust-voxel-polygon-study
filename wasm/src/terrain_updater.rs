@@ -67,8 +67,8 @@ impl TerrainUpdater {
             let masked_level = to_level((animation_time - INTRO_BEGIN_TIME) / INTRO_DURATION);
             f_list.push(update_if_maker(
                 Box::new(move |global_position: &glam::Vec3| {
-                    return previous_masked_level <= global_position.y()
-                        && global_position.y() < masked_level;
+                    return previous_masked_level <= global_position.y
+                        && global_position.y < masked_level;
                 }),
                 to_base_maker(scene_index, self.time_for_generate),
             ));
@@ -79,8 +79,8 @@ impl TerrainUpdater {
             let masked_level = to_level(1.0 - (animation_time - OUTRO_BEGIN_TIME) / OUTRO_DURATION);
             f_list.push(update_if_maker(
                 Box::new(move |global_position: &glam::Vec3| {
-                    return masked_level <= global_position.y()
-                        && global_position.y() < previous_masked_level;
+                    return masked_level <= global_position.y
+                        && global_position.y < previous_masked_level;
                 }),
                 Box::new(terrain_updater_air),
             ));
@@ -95,15 +95,15 @@ impl TerrainUpdater {
             let masked_level = to_level((animation_time - INTRO_BEGIN_TIME) / INTRO_DURATION);
             f_list.push(update_if_maker(
                 Box::new(move |global_position: &glam::Vec3| {
-                    return previous_masked_level <= global_position.y()
-                        && global_position.y() < masked_level;
+                    return previous_masked_level <= global_position.y
+                        && global_position.y < masked_level;
                 }),
                 to_base_maker(scene_index, self.time_for_generate),
             ));
         }
-        if (camera_position.x().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_WIDTH)
-            && (camera_position.y().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_HEIGHT)
-            && (camera_position.z().abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_DEPTH)
+        if (camera_position.x.abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_WIDTH)
+            && (camera_position.y.abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_HEIGHT)
+            && (camera_position.z.abs() - CAMERA_SPHERE_RADIUS <= UNIVERSE_SIZE_DEPTH)
         {
             f_list.push(terrain_updater_sphereremove_maker(
                 camera_position,
@@ -120,15 +120,15 @@ impl TerrainUpdater {
 pub fn terrain_updater_sinewave_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
-        let ground_level = (global_position.x() * 5.0 + time as f32 * 30.0)
+        let ground_level = (global_position.x * 5.0 + time as f32 * 30.0)
             .to_radians()
             .sin()
-            * (global_position.z() * 5.0).to_radians().sin()
+            * (global_position.z * 5.0).to_radians().sin()
             * 9.0
             - 10.0;
-        if global_position.y() < ground_level - 3.0 {
+        if global_position.y < ground_level - 3.0 {
             next_cell = Block::Dirt;
-        } else if global_position.y() < ground_level {
+        } else if global_position.y < ground_level {
             next_cell = Block::Weed;
         }
         Some(next_cell)
@@ -141,23 +141,23 @@ pub fn terrain_updater_plain_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         // Airであることが確定している座標
-        if 10.0 < global_position.y() {
+        if 10.0 < global_position.y {
             return Some(Block::Air);
         }
         // Dirtであることが確定している座標
-        if global_position.y() < -13.0 {
+        if global_position.y < -13.0 {
             return Some(Block::Dirt);
         }
         let value = noise.get([
-            global_position.x() as f64 * 0.1,
-            global_position.z() as f64 * 0.1,
+            global_position.x as f64 * 0.1,
+            global_position.z as f64 * 0.1,
             time,
         ]) as f32;
 
         let ground_level = value * 10.0;
-        if global_position.y() < ground_level - 3.0 {
+        if global_position.y < ground_level - 3.0 {
             next_cell = Block::Dirt;
-        } else if global_position.y() < ground_level {
+        } else if global_position.y < ground_level {
             next_cell = Block::Weed;
         }
         Some(next_cell)
@@ -186,17 +186,17 @@ pub fn terrain_updater_desert_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
 
-        if global_position.x().abs() < 10.0 && global_position.z().abs() < 10.0 {
+        if global_position.x.abs() < 10.0 && global_position.z.abs() < 10.0 {
             next_cell = Block::Metal;
         } else {
             let value = noise.get([
-                global_position.x() as f64 * 0.1,
-                global_position.z() as f64 * 0.1,
+                global_position.x as f64 * 0.1,
+                global_position.z as f64 * 0.1,
                 time,
             ]) as f32;
 
             let ground_level = value * 10.0;
-            if global_position.y() < ground_level {
+            if global_position.y < ground_level {
                 next_cell = Block::Sand;
             }
         }
@@ -211,16 +211,16 @@ pub fn terrain_updater_snowfield_maker(time: f64) -> Box<UpdaterType> {
         let mut next_cell = Block::Air;
 
         let value = noise.get([
-            global_position.x() as f64 * 0.1,
-            global_position.z() as f64 * 0.1,
+            global_position.x as f64 * 0.1,
+            global_position.z as f64 * 0.1,
             time,
         ]) as f32;
 
         let ground_level = value * 25.0 - 2.0;
         let snow_level = value * 10.0;
-        if global_position.y() < ground_level {
+        if global_position.y < ground_level {
             next_cell = Block::Concrete;
-        } else if global_position.y() < snow_level {
+        } else if global_position.y < snow_level {
             next_cell = Block::Snow;
         }
         Some(next_cell)
@@ -234,16 +234,16 @@ pub fn terrain_updater_mountain_maker(time: f64) -> Box<UpdaterType> {
         let mut next_cell = Block::Air;
 
         let value = noise.get([
-            global_position.x() as f64 * 0.03,
-            global_position.z() as f64 * 0.03,
+            global_position.x as f64 * 0.03,
+            global_position.z as f64 * 0.03,
             time,
         ]) as f32;
 
         let ground_level = value * 64.0 - 2.0;
         let stone_level = value * 20.0;
-        if global_position.y() < ground_level {
+        if global_position.y < ground_level {
             next_cell = Block::Rock;
-        } else if global_position.y() < stone_level {
+        } else if global_position.y < stone_level {
             next_cell = Block::Stone;
         }
         Some(next_cell)
@@ -257,47 +257,47 @@ pub fn terrain_updater_brickhouse_maker(time: f64) -> Box<UpdaterType> {
         let mut next_cell = Block::Air;
 
         let value = noise.get([
-            global_position.x() as f64 * 0.03,
-            global_position.z() as f64 * 0.03,
+            global_position.x as f64 * 0.03,
+            global_position.z as f64 * 0.03,
             time,
         ]) as f32;
 
         let ground_level = value * 3.0;
-        if -2.0 < global_position.y()
-            && global_position.y() < 1.0
-            && (-10.0 < global_position.x() && global_position.x() < 10.0)
-            && (-6.0 < global_position.z() && global_position.z() < 6.0)
+        if -2.0 < global_position.y
+            && global_position.y < 1.0
+            && (-10.0 < global_position.x && global_position.x < 10.0)
+            && (-6.0 < global_position.z && global_position.z < 6.0)
         {
             next_cell = Block::Stone;
-        } else if (1.0 < global_position.y() && global_position.y() < 12.0)
-            && (-8.0 < global_position.x() && global_position.x() < 8.0)
-            && (-4.0 < global_position.z() && global_position.z() < 4.0)
+        } else if (1.0 < global_position.y && global_position.y < 12.0)
+            && (-8.0 < global_position.x && global_position.x < 8.0)
+            && (-4.0 < global_position.z && global_position.z < 4.0)
         {
-            if 7.0 < global_position.y() {
-                if global_position.y() < (4.0 - global_position.z().abs()) + 7.0 {
+            if 7.0 < global_position.y {
+                if global_position.y < (4.0 - global_position.z.abs()) + 7.0 {
                     next_cell = Block::Brick;
-                } else if global_position.y() < (4.0 - global_position.z().abs()) + 8.0 {
+                } else if global_position.y < (4.0 - global_position.z.abs()) + 8.0 {
                     next_cell = Block::Tile;
                 }
-            } else if (-7.0 < global_position.x() && global_position.x() < 7.0)
-                && (-3.0 < global_position.z() && global_position.z() < 3.0)
+            } else if (-7.0 < global_position.x && global_position.x < 7.0)
+                && (-3.0 < global_position.z && global_position.z < 3.0)
             {
                 next_cell = Block::Air;
-            } else if (3.0 < global_position.y() && global_position.y() < 5.0)
-                && ((-6.0 < global_position.x() && global_position.x() < -4.0)
-                    || (-1.0 < global_position.x() && global_position.x() < 1.0)
-                    || (4.0 < global_position.x() && global_position.x() < 6.0))
+            } else if (3.0 < global_position.y && global_position.y < 5.0)
+                && ((-6.0 < global_position.x && global_position.x < -4.0)
+                    || (-1.0 < global_position.x && global_position.x < 1.0)
+                    || (4.0 < global_position.x && global_position.x < 6.0))
             {
                 next_cell = Block::Air;
             } else {
                 next_cell = Block::Brick;
             }
-        } else if global_position.y() < ground_level - 1.0 {
+        } else if global_position.y < ground_level - 1.0 {
             next_cell = Block::Dirt;
-        } else if global_position.y() < ground_level {
+        } else if global_position.y < ground_level {
             next_cell = Block::Weed;
         }
-        if global_position.y() < -2.0 {
+        if global_position.y < -2.0 {
             next_cell = Block::Stone;
         }
         Some(next_cell)
@@ -311,43 +311,43 @@ pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
     let f = move |global_position: &glam::Vec3| -> Option<Block> {
         let mut next_cell = Block::Air;
         let section_position = glam::vec3(
-            global_position.x().abs() % 16.0,
-            global_position.y(),
-            global_position.z().abs() % 16.0,
+            global_position.x.abs() % 16.0,
+            global_position.y,
+            global_position.z.abs() % 16.0,
         );
 
-        if (2.0 < section_position.x() && section_position.x() < 14.0)
-            && (2.0 < section_position.z() && section_position.z() < 14.0)
+        if (2.0 < section_position.x && section_position.x < 14.0)
+            && (2.0 < section_position.z && section_position.z < 14.0)
         {
             let building_position = glam::vec3(
-                (section_position.x() - 2.0) % 6.0,
-                section_position.y(),
-                (section_position.z() - 2.0) % 6.0,
+                (section_position.x - 2.0) % 6.0,
+                section_position.y,
+                (section_position.z - 2.0) % 6.0,
             );
-            if (1.0 < building_position.x()) && (1.0 < building_position.z()) {
-                if building_position.y() < 0.0 {
+            if (1.0 < building_position.x) && (1.0 < building_position.z) {
+                if building_position.y < 0.0 {
                     // 杭
-                    if (global_position.x().abs() % 2.0) + (global_position.z().abs() % 2.0) < 2.0 {
+                    if (global_position.x.abs() % 2.0) + (global_position.z.abs() % 2.0) < 2.0 {
                         next_cell = Block::Metal;
                     } else {
                         next_cell = Block::Rock;
                     }
                 } else {
                     let building_origin = glam::vec3(
-                        global_position.x() - building_position.x() * global_position.x().signum(),
+                        global_position.x - building_position.x * global_position.x.signum(),
                         0.0,
-                        global_position.z() - building_position.z() * global_position.z().signum(),
+                        global_position.z - building_position.z * global_position.z.signum(),
                     );
                     let value = noise.get([
-                        building_origin.x() as f64 * 0.1,
-                        building_origin.z() as f64 * 0.1,
+                        building_origin.x as f64 * 0.1,
+                        building_origin.z as f64 * 0.1,
                         time,
                     ]) as f32;
-                    if section_position.y() < 20.0 + value * 24.0 {
-                        if section_position.y() < 19.0 + value * 24.0
-                            && (section_position.y().floor() % 2.0 == 1.0)
-                            && ((section_position.x().floor() % 2.0 == 0.0)
-                                || (section_position.z().floor() % 2.0 == 0.0))
+                    if section_position.y < 20.0 + value * 24.0 {
+                        if section_position.y < 19.0 + value * 24.0
+                            && (section_position.y.floor() % 2.0 == 1.0)
+                            && ((section_position.x.floor() % 2.0 == 0.0)
+                                || (section_position.z.floor() % 2.0 == 0.0))
                         {
                             next_cell = Block::Air;
                         } else {
@@ -361,14 +361,14 @@ pub fn terrain_updater_skyscraper_maker(time: f64) -> Box<UpdaterType> {
                         }
                     }
                 }
-            } else if section_position.y() < -1.0 {
+            } else if section_position.y < -1.0 {
                 next_cell = Block::Rock;
-            } else if section_position.y() < 0.0 {
+            } else if section_position.y < 0.0 {
                 next_cell = Block::Tile;
             }
-        } else if section_position.y() < -1.0 {
+        } else if section_position.y < -1.0 {
             next_cell = Block::Rock;
-        } else if section_position.y() < 0.0 {
+        } else if section_position.y < 0.0 {
             next_cell = Block::Tile;
         }
 

@@ -27,7 +27,7 @@ impl V2F {
 
 impl V2F {
     pub fn from_glam(v: &glam::Vec2) -> V2F {
-        V2F { x: v.x(), y: v.y() }
+        V2F { x: v.x, y: v.y }
     }
     pub fn to_glam(&self) -> glam::Vec2 {
         glam::vec2(self.get_x(), self.get_y())
