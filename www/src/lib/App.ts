@@ -45,6 +45,8 @@ export default class App{
   }
   async setupThreeAsync(){
     const renderer=new THREE.WebGLRenderer({
+      // ogp画像を作成するときだけ有効化する
+      // preserveDrawingBuffer: true,
       antialias: true,
       canvas:document.querySelector("#View") as HTMLCanvasElement,
     });
