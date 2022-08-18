@@ -7,6 +7,12 @@ import {EXRLoader} from "three/examples/jsm/loaders/EXRLoader.js";
 import { updateBufferGeometry } from "./rust_to_three";
 import Stats from "stats.js"
 
+interface Ball{
+  mesh:THREE.Mesh,
+  fill:number,
+  radius:number,
+  velocity:THREE.Vector3,
+};
 
 export default class App{
   setupPromise:Promise<void>;
@@ -21,17 +27,23 @@ export default class App{
     bufferGeometryList:THREE.BufferGeometry[],
     controls:OrbitControls,
     meshList:Array<THREE.Mesh>,
+    ballAir:Ball,
+    ballBrick:Ball,
   };
   stats?:Stats;
   modes:{
     isDebug:boolean,
     isAuto:boolean,
+    isBall:boolean,
   };
+  previousTime:number;
   constructor(){
     this.modes={
       isDebug:true,
       isAuto:true,
+      isBall:false,
     };
+    this.previousTime=0;
     this.setupPromise=this.setupAsync();
   }
   async setupStatsAsync(){
@@ -210,6 +222,33 @@ export default class App{
       loadingTextElement.style.display="none";
     }
 
+    const radius=5;
+    const ballAir:Ball={
+      mesh:new THREE.Mesh(new THREE.SphereGeometry(radius,32,16),new THREE.MeshStandardMaterial({
+        color:0xff0000,
+        metalness:0.5,
+        roughness:0.5,
+      })),
+      fill:0xff,
+      radius,
+      velocity:new THREE.Vector3(13,11,17).multiplyScalar(1),
+    };
+    ballAir.mesh.visible=this.modes.isBall;
+    scene.add(ballAir.mesh);
+
+    const ballBrick:Ball={
+      mesh:new THREE.Mesh(new THREE.SphereGeometry(radius,32,16),new THREE.MeshStandardMaterial({
+        color:0x0000ff,
+        metalness:0.5,
+        roughness:0.5,
+      })),
+      fill:2,
+      radius,
+      velocity:new THREE.Vector3(-17,13,11).multiplyScalar(1),
+    };
+    ballBrick.mesh.visible=this.modes.isBall;
+    scene.add(ballBrick.mesh);
+
 
     this.three={
       renderer,
@@ -219,6 +258,8 @@ export default class App{
       controls,
       bufferGeometryList,
       meshList,
+      ballAir,
+      ballBrick,
     };
   }
   async setupEventsAsync():Promise<void>{
@@ -240,6 +281,9 @@ export default class App{
     document.querySelector(".button--debug")?.addEventListener("click",()=>{
       this.toggleDebug();
     });
+    document.querySelector(".button--ball")?.addEventListener("click",()=>{
+      this.toggleBall();
+    });
 
   }
   async setupAsync():Promise<void>{
@@ -260,11 +304,47 @@ export default class App{
     if(!this.three){
       throw new Error("this.three is null");
     }
-    const {renderer,scene,camera,bufferGeometryList,controls}=this.three;
+
+    const deltaTime=Math.min(time-this.previousTime,1000/60);
+    const {renderer,scene,camera,bufferGeometryList,controls,ballAir,ballBrick}=this.three;
+
+    if(this.modes.isBall){
+
+      const universeSize=universe.get_size();
+      const balls=[ballAir,ballBrick];
+      for(let ball of balls){
+        ball.mesh.position.add(ball.velocity.clone().multiplyScalar(deltaTime/1000));
+        if( universeSize.get_x() * 0.5 < ball.mesh.position.x + ball.radius){
+          ball.mesh.position.x =universeSize.get_x() * 0.5 - ball.radius;
+          ball.velocity.x*=-1;
+        }
+        if( ball.mesh.position.x - ball.radius < universeSize.get_x() * -0.5){
+          ball.mesh.position.x =universeSize.get_x() * - 0.5 + ball.radius;
+          ball.velocity.x*=-1;
+        }
+        if( universeSize.get_y() * 0.5 < ball.mesh.position.y + ball.radius){
+          ball.mesh.position.y =universeSize.get_y() * 0.5 - ball.radius;
+          ball.velocity.y*=-1;
+        }
+        if( ball.mesh.position.y - ball.radius < universeSize.get_y() * -0.5){
+          ball.mesh.position.y =universeSize.get_y() * - 0.5 + ball.radius;
+          ball.velocity.y*=-1;
+        }
+        if( universeSize.get_z() * 0.5 < ball.mesh.position.z + ball.radius){
+          ball.mesh.position.z =universeSize.get_z() * 0.5 - ball.radius;
+          ball.velocity.z*=-1;
+        }
+        if( ball.mesh.position.z - ball.radius < universeSize.get_z() * -0.5){
+          ball.mesh.position.z =universeSize.get_z() * - 0.5 + ball.radius;
+          ball.velocity.z*=-1;
+        }
+        universe.update_add_sphere(V3F.new(ball.mesh.position.x,ball.mesh.position.y,ball.mesh.position.z),ball.radius,ball.fill);
+
+      }
+    }
+
     controls.update();
     universe.update(time * 0.001,V3F.new(camera.position.x,camera.position.y,camera.position.z));
-    // universe.update_add_sphere(V3F.new(5,0,0),10.0,2);
-    // universe.update_add_sphere(V3F.new(0,0,0),10.0,0xff);
     universe.draw();
 
     const l=universe.get_chunk_list_length();
@@ -276,6 +356,7 @@ export default class App{
     }
     renderer.render(scene,camera);
     this.stats.end();
+    this.previousTime=time;
   }
   toggleAuto(){
     if(!this.three){
@@ -306,6 +387,17 @@ export default class App{
     }
 
   }
+  toggleBall(){
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
+    this.modes.isBall=!this.modes.isBall;
+    const {ballAir,ballBrick}=this.three;
+
+    ballAir.mesh.visible=this.modes.isBall;
+    ballBrick.mesh.visible=this.modes.isBall;
+
+  }
   onKeyDown(event:KeyboardEvent){
     switch(event.key){
       case "a":
@@ -313,6 +405,9 @@ export default class App{
         break;
       case "d":
         this.toggleDebug();
+        break;
+      case "b":
+        this.toggleBall();
         break;
     }
   }

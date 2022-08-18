@@ -1,5 +1,11 @@
 use crate::{
-    block::*, chunk::*, terrain_updater::TerrainUpdater, utils, v2f::V2F, v3f::V3F, v3i::V3I,
+    block::*,
+    chunk::*,
+    terrain_updater::{terrain_updater_sphere_maker, TerrainUpdater},
+    utils,
+    v2f::V2F,
+    v3f::V3F,
+    v3i::V3I,
 };
 use wasm_bindgen::prelude::*;
 
@@ -112,35 +118,29 @@ impl Universe {
             }
         }
     }
-    // pub fn update_add_sphere(
-    //     &mut self,
-    //     sphere_position: V3F,
-    //     sphere_radius: f32,
-    //     fill_block: Block,
-    // ) {
-    //     let mut chunk_to_invalidate_list = vec![];
+    pub fn update_add_sphere(
+        &mut self,
+        sphere_position: V3F,
+        sphere_radius: f32,
+        fill_block: Block,
+    ) {
+        let mut chunk_to_invalidate_list = vec![];
 
-    //     let sphere_position = sphere_position.to_glam();
-    //     let sphere_radius_squared = sphere_radius * sphere_radius;
-    //     let my_terrain_updater: Box<UpdaterType> =
-    //         Box::new(move |global_position: &glam::Vec3| -> Option<Block> {
-    //             if (*global_position - sphere_position).length_squared() < sphere_radius_squared {
-    //                 return Some(fill_block);
-    //             }
-    //             None
-    //         });
+        let sphere_position = sphere_position.to_glam();
+        let my_terrain_updater =
+            terrain_updater_sphere_maker(sphere_position, sphere_radius, fill_block);
 
-    //     for chunk in self.chunk_list.iter_mut() {
-    //         let mut v = chunk.update(&my_terrain_updater);
-    //         chunk_to_invalidate_list.append(&mut v);
-    //     }
-    //     for chunk_to_invalidate in chunk_to_invalidate_list {
-    //         let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_to_invalidate);
-    //         if let Some(chunk) = chunk_option {
-    //             chunk.needs_draw = true;
-    //         }
-    //     }
-    // }
+        for chunk in self.chunk_list.iter_mut() {
+            let mut v = chunk.update(&my_terrain_updater);
+            chunk_to_invalidate_list.append(&mut v);
+        }
+        for chunk_to_invalidate in chunk_to_invalidate_list {
+            let chunk_option = self.get_mut_chunk_option_by_chunk_index(&chunk_to_invalidate);
+            if let Some(chunk) = chunk_option {
+                chunk.needs_draw = true;
+            }
+        }
+    }
 
     pub fn draw(&mut self) {
         let chunk_index_list: Vec<V3I> = self
