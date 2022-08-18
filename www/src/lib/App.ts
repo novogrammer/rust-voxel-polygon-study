@@ -22,15 +22,21 @@ export default class App{
     controls:OrbitControls,
   };
   stats?:Stats;
-  isDebug:boolean;
+  modes:{
+    isDebug:boolean,
+    isAuto:boolean,
+  };
   constructor(){
-    this.isDebug=true;
+    this.modes={
+      isDebug:true,
+      isAuto:true,
+    };
     this.setupPromise=this.setupAsync();
   }
   async setupStatsAsync(){
     const stats=new Stats();
     document.body.appendChild(stats.dom);
-    stats.dom.style.display=this.isDebug?"block":"none";
+    stats.dom.style.display=this.modes.isDebug?"block":"none";
     this.stats=stats;
 
   }
@@ -60,7 +66,7 @@ export default class App{
     camera.position.y = 5;
     camera.position.z = 50;
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.autoRotate=true;
+    controls.autoRotate=this.modes.isAuto;
     controls.autoRotateSpeed=1.0;
   
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -99,96 +105,6 @@ export default class App{
       t.needsUpdate=true;
     };
 
-    // const material= await (async()=>{
-    //   const baseDir="./textures/coast_sand_rocks_02_1k/";
-    //   const diff=await loadTextureAsync(baseDir,"coast_sand_rocks_02_diff_1k.jpg");
-    //   // const disp=await loadTextureAsync(baseDir,"coast_sand_rocks_02_disp_1k.png");
-    //   const nor=await loadEXRTextureAsync(baseDir,"coast_sand_rocks_02_nor_gl_1k.exr");
-    //   const rough=await loadEXRTextureAsync(baseDir,"coast_sand_rocks_02_rough_1k.exr");
-
-    //   const material=new THREE.MeshStandardMaterial({
-    //     map:diff,
-    //     roughnessMap:rough,
-    //     metalness:0,
-    //     normalMap:nor,
-    //     // displacementMap:disp,
-    //     vertexColors:true,
-    //   });
-    //   return material;
-  
-    // })();
-
-    // const material=await(async()=>{
-    //   const baseDir="./textures/metal_plate_1k/";
-    //   const diff=await loadTextureAsync(baseDir,"metal_plate_diff_1k.jpg");
-    //   // const disp=await loadTextureAsync(baseDir,"metal_plate_disp_1k.png");
-    //   const nor=await loadEXRTextureAsync(baseDir,"metal_plate_nor_gl_1k.exr");
-    //   const rough=await loadTextureAsync(baseDir,"metal_plate_rough_1k.jpg");
-    
-    //   const material=new THREE.MeshStandardMaterial({
-    //     map:diff,
-    //     roughnessMap:rough,
-    //     metalness:0,
-    //     normalMap:nor,
-    //     // displacementMap:disp,
-    //     vertexColors:true,
-    //   });
-    //   return material;
-    // })();
-
-    // const material=await(async()=>{
-    //   const baseDir="./textures/rock_boulder_cracked_1k/";
-    //   const diff=await loadTextureAsync(baseDir,"rock_boulder_cracked_diff_1k.jpg");
-    //   // const disp=await loadTextureAsync(baseDir,"rock_boulder_cracked_disp_1k.png");
-    //   const nor=await loadEXRTextureAsync(baseDir,"rock_boulder_cracked_nor_gl_1k.exr");
-    //   const rough=await loadEXRTextureAsync(baseDir,"rock_boulder_cracked_rough_1k.exr");
-    
-    //   const material=new THREE.MeshStandardMaterial({
-    //     map:diff,
-    //     roughnessMap:rough,
-    //     metalness:0,
-    //     normalMap:nor,
-    //     // displacementMap:disp,
-    //     vertexColors:true,
-    //   });
-    //   return material;
-    // })();
-
-    // const material=await(async()=>{
-    //   const baseDir="./textures/stone_brick_wall_001_1k/";
-    //   const diff=await loadTextureAsync(baseDir,"stone_brick_wall_001_diff_1k.jpg");
-    //   // const disp=await loadTextureAsync(baseDir,"stone_brick_wall_001_disp_1k.png");
-    //   const nor=await loadEXRTextureAsync(baseDir,"stone_brick_wall_001_nor_gl_1k.exr");
-    //   const rough=await loadTextureAsync(baseDir,"stone_brick_wall_001_rough_1k.jpg");
-    
-    //   const material=new THREE.MeshStandardMaterial({
-    //     map:diff,
-    //     roughnessMap:rough,
-    //     metalness:0,
-    //     normalMap:nor,
-    //     // displacementMap:disp,
-    //     vertexColors:true,
-    //   });
-    //   return material;
-    // })();
-
-    // const material=await(async()=>{
-    //   const baseDir="./textures/red_brick_03_1k/";
-    //   const diff=await loadTextureAsync(baseDir,"red_brick_03_diff_1k.jpg");
-    //   // const disp=await loadTextureAsync(baseDir,"red_brick_03_disp_1k.png");
-    //   const nor=await loadEXRTextureAsync(baseDir,"red_brick_03_nor_gl_1k.exr");
-    //   const rough=await loadTextureAsync(baseDir,"red_brick_03_rough_1k.jpg");
-    
-    //   const material=new THREE.MeshStandardMaterial({
-    //     map:diff,
-    //     roughnessMap:rough,
-    //     metalness:0,
-    //     normalMap:nor,
-    //     // displacementMap:disp,
-    //     vertexColors:true,
-    //   });
-    //   return material;
-    // })();
 
     const material=await(async()=>{
       const baseDir="./textures/packed/";
@@ -308,6 +224,13 @@ export default class App{
     window.addEventListener("keydown",this.onKeyDown.bind(this));
     window.addEventListener("keyup",this.onKeyUp.bind(this));
 
+    document.querySelector(".button--auto")?.addEventListener("click",()=>{
+      this.toggleAuto();
+    });
+    document.querySelector(".button--debug")?.addEventListener("click",()=>{
+      this.toggleDebug();
+    });
+
   }
   async setupAsync():Promise<void>{
     await this.setupStatsAsync();
@@ -344,25 +267,31 @@ export default class App{
     renderer.render(scene,camera);
     this.stats.end();
   }
-  onKeyDown(event:KeyboardEvent){
+  toggleAuto(){
     if(!this.three){
       throw new Error("this.three is null");
     }
+    const {controls}=this.three;
+    this.modes.isAuto=!this.modes.isAuto;
+    controls.autoRotate=this.modes.isAuto;
+  }
+  toggleDebug(){
     if(!this.stats){
       throw new Error("this.stats is null");
     }
-    const {controls}=this.three;
     const {stats}=this;
+    this.modes.isDebug=!this.modes.isDebug;
+    stats.dom.style.display=this.modes.isDebug?"block":"none";
+  }
+  onKeyDown(event:KeyboardEvent){
     switch(event.key){
       case "a":
-        controls.autoRotate=!controls.autoRotate;
+        this.toggleAuto();
         break;
       case "d":
-        this.isDebug=!this.isDebug;
-        stats.dom.style.display=this.isDebug?"block":"none";
+        this.toggleDebug();
         break;
     }
-  
   }
   onKeyUp(event:KeyboardEvent){
 

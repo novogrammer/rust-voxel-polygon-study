@@ -26,21 +26,24 @@
         left:0;
         font-size:10vw;
       }
-      .go-github{
+      .button-list{
         position:fixed;
         right:2vmin;
         bottom:2vmin;
+      }
+      .button{
+        display:inline-block;
         color:#000;
         border:1px solid;
         border-radius: 9999px;
-        padding:0 0.5vmin;
         background:rgba(255,255,255,0.5);
         text-decoration: none;
         font-size:4vmin;
         line-height:6vmin;
-        padding:1vmin;
+        padding:1vmin 2vmin;
+        cursor:pointer;
       }
-      .go-github img{
+      .button img{
         width:auto;
         height:6vmin;
         vertical-align: bottom;
@@ -50,7 +53,11 @@
   </head>
   <body>
     <canvas id="View"></canvas>
-    <a class="go-github" href="https://github.com/novogrammer/rust-voxel-polygon-study"><img src="./img/GitHub-Mark-64px.png"alt="GitHub">GitHub</a>
+    <div class="button-list">
+      <span class="button button--auto">Auto</span>
+      <span class="button button--debug">Debug</span>
+      <a class="button button--github" href="https://github.com/novogrammer/rust-voxel-polygon-study"><img src="./img/GitHub-Mark-64px.png"alt="GitHub">GitHub</a>
+    </div>
     <div class="loading-text">Loading...</div>
     <script src="./bootstrap.js"></script>
   </body>
