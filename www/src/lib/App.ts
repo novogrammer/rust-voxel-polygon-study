@@ -20,6 +20,7 @@ export default class App{
     material:THREE.Material,
     bufferGeometryList:THREE.BufferGeometry[],
     controls:OrbitControls,
+    meshList:Array<THREE.Mesh>,
   };
   stats?:Stats;
   modes:{
@@ -148,6 +149,7 @@ export default class App{
     // const maxGeometryVertexLength=universe.get_max_geometry_vertex_length();
     const initialGeometryVertexLength=universe.get_initial_geometry_vertex_length();
     const bufferGeometryList=[];
+    const meshList=[];
     for(let i=0;i<l;i++){
       const bufferGeometry = new THREE.BufferGeometry();
       bufferGeometry.userData.vertexLength=initialGeometryVertexLength;
@@ -188,6 +190,13 @@ export default class App{
       const origin=universe.get_chunk_origin(i);
       mesh.position.set(origin.get_x(),origin.get_y(),origin.get_z());
       scene.add(mesh);
+      meshList.push(mesh);
+
+      const chunkSize=universe.get_chunk_size(i);
+      const boundingBox=new THREE.Box3(new THREE.Vector3(0,0,0),new THREE.Vector3(chunkSize.get_x(),chunkSize.get_y(),chunkSize.get_z()));
+      const boundingBoxHelper=new THREE.Box3Helper(boundingBox,new THREE.Color(0xff00ff));
+      boundingBoxHelper.visible=this.modes.isDebug;
+      mesh.add(boundingBoxHelper);
     }
     for(let i=0;i<l;i++){
       const bufferGeometry=bufferGeometryList[i];
@@ -209,6 +218,7 @@ export default class App{
       material,
       controls,
       bufferGeometryList,
+      meshList,
     };
   }
   async setupEventsAsync():Promise<void>{
@@ -279,9 +289,22 @@ export default class App{
     if(!this.stats){
       throw new Error("this.stats is null");
     }
-    const {stats}=this;
+    if(!this.three){
+      throw new Error("this.three is null");
+    }
     this.modes.isDebug=!this.modes.isDebug;
+
+    const {stats}=this;
     stats.dom.style.display=this.modes.isDebug?"block":"none";
+
+    const {meshList}=this.three;
+    for(let mesh of meshList){
+      const boundingBoxHelper=mesh.children[0];
+      if(boundingBoxHelper){
+        boundingBoxHelper.visible=this.modes.isDebug;
+      }
+    }
+
   }
   onKeyDown(event:KeyboardEvent){
     switch(event.key){
