@@ -65,7 +65,7 @@ export default class App {
     const renderer = new THREE.WebGLRenderer({
       // ogp画像を作成するときだけ有効化する
       // preserveDrawingBuffer: true,
-      antialias: true,
+      antialias: false,
       canvas: document.querySelector("#View") as HTMLCanvasElement,
     });
     renderer.shadowMap.enabled = true;
