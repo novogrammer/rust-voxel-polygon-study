@@ -1,53 +1,71 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>RustとWebAssemblyの習作</title>
-    <meta name="description" content="Minecraftライクなボクセルをwasmでリアルタイム更新しつつthree.jsで表示します。">
-    <meta property="og:locale" content="ja_JP">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="RustとWebAssemblyの習作">
-    <meta property="og:image" content="https://novogrammer.github.io/rust-voxel-polygon-study/img/ogp.png">
-    <meta property="og:url" content="https://novogrammer.github.io/rust-voxel-polygon-study/">
-    <meta property="og:site_name" content="novogrammer">
-    <link rel="canonical" href="https://novogrammer.github.io/rust-voxel-polygon-study/">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@novogrammer">
-    <meta name="twitter:image" content="https://novogrammer.github.io/rust-voxel-polygon-study/img/ogp.png">
-    <meta name="twitter:description" content="Minecraftライクなボクセルをwasmでリアルタイム更新しつつthree.jsで表示します。">
+    <meta
+      name="description"
+      content="Minecraftライクなボクセルをwasmでリアルタイム更新しつつthree.jsで表示します。"
+    />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="RustとWebAssemblyの習作" />
+    <meta
+      property="og:image"
+      content="https://novogrammer.github.io/rust-voxel-polygon-study/img/ogp.png"
+    />
+    <meta
+      property="og:url"
+      content="https://novogrammer.github.io/rust-voxel-polygon-study/"
+    />
+    <meta property="og:site_name" content="novogrammer" />
+    <link
+      rel="canonical"
+      href="https://novogrammer.github.io/rust-voxel-polygon-study/"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@novogrammer" />
+    <meta
+      name="twitter:image"
+      content="https://novogrammer.github.io/rust-voxel-polygon-study/img/ogp.png"
+    />
+    <meta
+      name="twitter:description"
+      content="Minecraftライクなボクセルをwasmでリアルタイム更新しつつthree.jsで表示します。"
+    />
     <style>
-      body{
-        margin:0;
+      body {
+        margin: 0;
       }
-      .loading-text{
-        position:fixed;
-        top:0;
-        left:0;
-        font-size:10vw;
+      .loading-text {
+        position: fixed;
+        top: 0;
+        left: 0;
+        font-size: 10vw;
       }
-      .button-list{
-        position:fixed;
-        right:2vmin;
-        bottom:2vmin;
+      .button-list {
+        position: fixed;
+        right: 2vmin;
+        bottom: 2vmin;
       }
-      .button{
-        display:inline-block;
-        color:#000;
-        border:1px solid;
+      .button {
+        display: inline-block;
+        color: #000;
+        border: 1px solid;
         border-radius: 9999px;
-        background:rgba(255,255,255,0.5);
+        background: rgba(255, 255, 255, 0.5);
         text-decoration: none;
-        font-size:4vmin;
-        line-height:6vmin;
-        padding:1vmin 2vmin;
-        cursor:pointer;
+        font-size: 4vmin;
+        line-height: 6vmin;
+        padding: 1vmin 2vmin;
+        cursor: pointer;
       }
-      .button img{
-        width:auto;
-        height:6vmin;
+      .button img {
+        width: auto;
+        height: 6vmin;
         vertical-align: bottom;
-        margin-right:1vmin;
+        margin-right: 1vmin;
       }
     </style>
   </head>
@@ -57,7 +75,11 @@
       <span class="button button--ball">Ball</span>
       <span class="button button--auto">Auto</span>
       <span class="button button--debug">Debug</span>
-      <a class="button button--github" href="https://github.com/novogrammer/rust-voxel-polygon-study"><img src="./img/GitHub-Mark-64px.png"alt="GitHub">GitHub</a>
+      <a
+        class="button button--github"
+        href="https://github.com/novogrammer/rust-voxel-polygon-study"
+        ><img src="./img/GitHub-Mark-64px.png" alt="GitHub" />GitHub</a
+      >
     </div>
     <div class="loading-text">Loading...</div>
     <script src="./bootstrap.js"></script>
