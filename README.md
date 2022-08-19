@@ -1,9 +1,11 @@
 # rust-voxel-polygon-study
-SNACKS vol4（2022年夏）で展示する、RustとWebAssemblyの習作。
+
+SNACKS vol4（2022 年夏）で展示する、Rust と WebAssembly の習作。
 
 DEMO https://novogrammer.github.io/rust-voxel-polygon-study/
 
 ## git clone
+
 ```
 $ git clone git@github.com:novogrammer/rust-voxel-polygon-study.git
 ```
@@ -16,7 +18,6 @@ $ git clone git@github.com:novogrammer/rust-voxel-polygon-study.git
 
 `wasm-pack`のインストール https://rustwasm.github.io/wasm-pack/installer/
 
-
 ### Node.js
 
 ```
@@ -27,12 +28,14 @@ $ npm i
 ## ビルド
 
 ### wasm
+
 ```
 $ cd wasm
 $ wasm-pack build
 ```
 
 ### www
+
 ```
 $ cd www
 $ npm run build
@@ -45,27 +48,30 @@ $ cd www
 $ npm run start
 ```
 
-## Dockerを使ったビルド
+## Docker を使ったビルド
 
 ### wasm
 
-（Macでは）うまくコンパイルできないので事前にCargo.tomlを変更しておく
+（Mac では）うまくコンパイルできないので事前に Cargo.toml を変更しておく
+
 ```
 [package.metadata.wasm-pack.profile.release]
 # wasm-opt = ['-O4', '-g']
 wasm-opt = false
 ```
 
-wasmフォルダは事前にbuildしておく必要がある。
+wasm フォルダは事前に build しておく必要がある。
 
 ```
 $ cd wasm
 $ docker compose build
 $ docker compose up
 ```
+
 ### www
 
-wasmディレクトリも使うのでプロジェクトルートでビルドする。
+wasm ディレクトリも使うのでプロジェクトルートでビルドする。
+
 ```
 $ docker compose build
 $ docker compose up
