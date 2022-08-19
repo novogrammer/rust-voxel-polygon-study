@@ -80,7 +80,7 @@ export default class App {
       0.01,
       1000
     );
-    camera.position.y = 5;
+    camera.position.y = 20;
     camera.position.z = 50;
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.autoRotate = this.modes.isAuto;
