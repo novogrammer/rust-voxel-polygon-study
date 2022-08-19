@@ -39,7 +39,7 @@ export default class App {
   previousTime: number;
   constructor() {
     this.modes = {
-      isDebug: true,
+      isDebug: false,
       isAuto: true,
       isBall: false,
     };
