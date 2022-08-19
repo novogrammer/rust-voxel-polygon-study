@@ -314,6 +314,11 @@ export default class App {
     document.querySelector(".button--ball")?.addEventListener("click", () => {
       this.toggleBall();
     });
+    document
+      .querySelector(".button--fullscreen")
+      ?.addEventListener("click", () => {
+        this.toggleFullscreen();
+      });
   }
   async setupAsync(): Promise<void> {
     await this.setupStatsAsync();
@@ -444,6 +449,19 @@ export default class App {
     ballAir.mesh.visible = this.modes.isBall;
     ballBrick.mesh.visible = this.modes.isBall;
   }
+  toggleFullscreen() {
+    if (!this.three) {
+      throw new Error("this.three is null");
+    }
+    if (!document.fullscreenElement) {
+      const { renderer } = this.three;
+      renderer.domElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
   onKeyDown(event: KeyboardEvent) {
     switch (event.key) {
       case "a":
@@ -454,6 +472,12 @@ export default class App {
         break;
       case "b":
         this.toggleBall();
+        break;
+      case "f":
+        this.toggleFullscreen();
+        break;
+      default:
+        // DO NOTHING
         break;
     }
   }
